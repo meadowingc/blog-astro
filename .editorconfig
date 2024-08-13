@@ -1,0 +1,26 @@
+# EditorConfig is awesome: https://EditorConfig.org
+
+# Top-most EditorConfig file
+root = true
+
+# Unix-style newlines with a newline ending every file
+[*]
+end_of_line = lf
+insert_final_newline = true
+
+# 2 space indentation
+[*.{js,jsx,ts,tsx,astro,css,scss,html,json,md}]
+indent_style = space
+indent_size = 2
+
+# Trim trailing whitespace
+trim_trailing_whitespace = true
+
+# Specific settings for Markdown files
+[*.md]
+trim_trailing_whitespace = false
+
+# Specific settings for JSON files
+[*.json]
+indent_style = space
+indent_size = 2
