@@ -6,13 +6,13 @@ import fs from "fs";
 
 const csvText = fs.readFileSync("public/post_export.csv", "utf-8");
 const allPosts = Papa.parse(csvText, { header: true })
-  .data.filter((post) => post["is page"] === "False")
-  .map((post) => {
+  .data.filter((post: any) => post["is page"] === "False")
+  .map((post: any) => {
     post["published date"] = new Date(post["published date"]);
 
     return post;
   })
-  .sort((a, b) => b["published date"] - a["published date"]);
+  .sort((a: any, b: any) => b["published date"] - a["published date"]);
 ---
 
 <Layout pageTitle={"Blog"}>
@@ -22,8 +22,8 @@ const allPosts = Papa.parse(csvText, { header: true })
   <ul class="embedded blog-posts">
     {
       allPosts
-        .filter((st) => st.slug)
-        .map((st) => (
+        .filter((st: any) => st.slug)
+        .map((st: any) => (
           <li>
             <span>
               <i>

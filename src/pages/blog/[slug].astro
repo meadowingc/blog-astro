@@ -1,7 +1,5 @@
 ---
 import Layout from "../../layouts/Layout.astro";
-import Header from "../../components/Header.astro";
-import Footer from "../../components/Footer.astro";
 
 import Papa from "papaparse";
 import fs from "fs";
@@ -12,9 +10,9 @@ export async function getStaticPaths() {
   const allPosts = Papa.parse(csvText, { header: true }).data;
 
   return allPosts
-    .filter((post) => post["is page"] === "False")
-    .filter((post) => post["publish"] === "True")
-    .map((post) => {
+    .filter((post: any) => post["is page"] === "False")
+    .filter((post: any) => post["publish"] === "True")
+    .map((post: any) => {
       post["all tags"] = JSON.parse(post["all tags"]);
       post["content"] = marked(post["content"]);
       post["published date"] = new Date(post["published date"]);
@@ -30,7 +28,7 @@ interface Props {
   post: any;
 }
 
-const { slug } = Astro.params;
+// const { slug } = Astro.params;
 const { post } = Astro.props;
 ---
 
