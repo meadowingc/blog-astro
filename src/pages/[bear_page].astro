@@ -1,0 +1,37 @@
+---
+import Layout from "../layouts/Layout.astro";
+
+import Papa from "papaparse";
+import fs from "fs";
+import { marked } from "marked";
+
+export async function getStaticPaths() {
+  const csvText = fs.readFileSync("public/post_export.csv", "utf-8");
+  const allPages = Papa.parse(csvText, { header: true }).data;
+
+  return allPages
+    .filter((page) => page["is page"] === "True")
+    .filter((page) => page["publish"] === "True")
+    .map((page) => {
+      page["all tags"] = JSON.parse(page["all tags"]);
+      page["content"] = marked(page["content"]);
+      page["published date"] = new Date(page["published date"]);
+
+      return {
+        params: { bear_page: `${page.slug}` },
+        props: { page: page },
+      };
+    });
+}
+
+interface Props {
+  bear_page: any;
+}
+
+const { bear_page } = Astro.params;
+const { page } = Astro.props;
+---
+
+<Layout pageTitle={page.title}>
+  <article set:html={page.content} />
+</Layout>
