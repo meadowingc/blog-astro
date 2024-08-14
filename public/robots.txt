@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://meadowing.club/sitemap-index.xml
+Sitemap: https://meadow.cafe/sitemap-index.xml
