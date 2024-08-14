@@ -1,17 +1,17 @@
 ---
+import { getCollection } from "astro:content";
 import Layout from "../../layouts/Layout.astro";
 
-import Papa from "papaparse";
-import fs from "fs";
-
-const csvText = fs.readFileSync("public/post_export.csv", "utf-8");
-const allPosts = Papa.parse(csvText, { header: true })
-  .data.filter((post: any) => post["is page"] === "False")
-  .map((post: any) => {
+const allPosts = (await getCollection("bear_export"))
+  .map((postCol: any) => {
+    const post = postCol.data;
     post["published date"] = new Date(post["published date"]);
+    post["last modified"] = new Date(post["last modified"]);
+    post["first published at"] = new Date(post["last modified"]);
 
     return post;
   })
+  .filter((post: any) => post.publish && !post["is page"])
   .sort((a: any, b: any) => b["published date"] - a["published date"]);
 ---
 
