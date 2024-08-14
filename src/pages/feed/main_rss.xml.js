@@ -15,15 +15,10 @@ export async function GET(context) {
     .sort((a, b) => b["published date"] - a["published date"]);
 
   return rss({
-    // `<title>` field in output xml
     title: 'Meadow',
-    // `<description>` field in output xml
     description: 'A humble Astronaut’s guide to the stars',
-    // Pull in your project "site" from the endpoint context
-    // https://docs.astro.build/en/reference/api-reference/#contextsite
     site: context.site,
-    // Array of `<item>`s in output xml
-    // See "Generating items" section for examples using content collections and glob imports
+    stylesheet: '/rss/pretty-feed-v3.xsl',
     items: bearPosts.map((post) => ({
       title: `${post.title}`,
       link: `/blog/${post.slug}/`,

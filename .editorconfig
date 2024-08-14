@@ -7,13 +7,12 @@ root = true
 [*]
 end_of_line = lf
 insert_final_newline = true
+indent_style = space
 
 # 2 space indentation
 [*.{js,jsx,ts,tsx,astro,css,scss,html,json,md}]
 indent_style = space
 indent_size = 2
-
-# Trim trailing whitespace
 trim_trailing_whitespace = true
 
 # Specific settings for Markdown files

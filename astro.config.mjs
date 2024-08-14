@@ -7,5 +7,9 @@ import sitemap from "@astrojs/sitemap";
 // https://astro.build/config
 export default defineConfig({
   site: 'https://meadow.cafe',
-  integrations: [mdx(), sitemap()]
+  output: 'static',
+  integrations: [mdx(), sitemap()],
+  markdown: {
+    // remarkRehype: { footnoteLabel: "Footnotes", footnoteLabelTagName: "sup" },
+  },
 });

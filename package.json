@@ -21,6 +21,7 @@
     "@astrojs/sitemap": "^3.1.6",
     "astro": "^4.13.4",
     "marked": "^14.0.0",
+    "marked-footnote": "^1.2.2",
     "papaparse": "^5.4.1",
     "typescript": "^5.5.4"
   },

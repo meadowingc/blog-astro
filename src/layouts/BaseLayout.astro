@@ -15,7 +15,7 @@ const { pageTitle } = Astro.props;
     <link
         rel="alternate"
         type="application/rss+xml"
-        title="Meadow"
+        title="Meadow — Main Feed"
         href={new URL("feed/main_rss.xml", Astro.site)}
     />
     <title>{pageTitle} | Meadow</title>
@@ -210,5 +210,9 @@ const { pageTitle } = Astro.props;
 
   button.upvote-button {
     cursor: pointer;
+  }
+
+  .sr-only {
+    display: none;
   }
 </style>
