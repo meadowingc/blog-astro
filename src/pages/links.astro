@@ -1,0 +1,114 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { Markdown } from "@astropub/md";
+
+const gumboLinks = `
+- [Youtube vs Adblockers, Apps vs the Open Web · roytang.net](https://roytang.net/2023/11/youtube-adblockers/)
+- [when the vision isn’t manifesting - by visakan veerasamy (substack.com)](https://visakanv.substack.com/p/when-the-vision-isnt-manifesting)
+- [Blog What You Like ❤️ | Brandon Writes](https://brandonwrites.xyz/blog-what-you-like/)
+- [Digital relationships – Lars-Christian.com](https://lars-christian.com/digital-relationships/)
+- [Misunderstanding the slow life and failing to live – Ratika Deshpande (wordpress.com)](https://chavanniclass.wordpress.com/2024/03/11/misunderstanding-slow-failing-to-live/)
+- [sausage rolls and spending habits | uvek zauvek (bearblog.dev)](https://aco.bearblog.dev/sausage-rolls-and-spending-habits/)
+- [Finding Myself | Brandon Writes](https://brandonwrites.xyz/finding-myself/)
+- [Pleiades | Cortrinkau's Blog (bearblog.dev)](https://cortrinkau.bearblog.dev/pleiades/)
+- [my desire to be well-informed is currently at odds with my desire to remain sane. | uvek zauvek (bearblog.dev)](https://aco.bearblog.dev/my-desire-to-be-well-informed-is-currently-at-odds-with-my-desire-to-remain-sane/)
+- [Where did all the grown ups go? – Lars-Christian.com](https://lars-christian.com/where-did-all-the-grown-ups-go/)
+- [language (orwell, russell) - @visakanv's blog](https://www.visakanv.com/blog/language/)
+- [be kind to yourself | 猫である (bearblog.dev)](https://neko.bearblog.dev/be-kind-to-yourself/)
+- [Carnival in hell | Rat's house (bearblog.dev)](https://therat.bearblog.dev/carnival-in-hell/)
+- [The time I tried to pick up smoking – Lars-Christian.com](https://lars-christian.com/the-time-i-tried-to-pick-up-smoking/)
+- [strive for the company of immortals - 1,000,000 words by @visakanv](https://visakanv.com/1000/0220-aim-for-the-company-of-immortals/)
+- [Legends of the Ancient Web (idlewords.com)](https://idlewords.com/talks/ancient_web.htm)
+- [bringing a fruitcake to a holiday party | uvek zauvek (bearblog.dev)](https://aco.bearblog.dev/bringing-a-fruitcake-to-a-holiday-party/)
+- [make friends (pt 1) - 1,000,000 words by @visakanv](https://visakanv.com/1000/0759-make-friends-pt-1/)
+- [Why You Should Stop Caring What Other People Think (Taming the Mammoth) - Wait But Why](https://waitbutwhy.com/2014/06/taming-mammoth-let-peoples-opinions-run-life.html)
+- [How ad-addicted companies inadvertently set me free | Rat's house (bearblog.dev)](https://therat.bearblog.dev/how-ad-addicted-companies-inadvertently-set-me-free/)
+- [YouTube Hates Your Soul | George Carter (gamc.uk)](https://gamc.uk/youtube-hates-your-soul/)
+- [Growth is a mind cancer – Manu (manuelmoreale.com)](https://manuelmoreale.com/growth-is-a-mind-cancer)
+- [On Meaning in the Act of Writing | Kadambari (bearblog.dev)](https://kadambari.bearblog.dev/meaning-act-of-writing/)
+- [Stop Acting Like You're Famous (ajkprojects.com)](https://ajkprojects.com/stopactinglikeyourefamous)
+- [Minimum viable consistency – Lars-Christian.com](https://lars-christian.com/minimum-viable-consistency/)
+- [The grand designer was mortal after all](https://www.robinsloan.com/moonbound/mortal-after-all/)
+- [Wudang Taoist Wellness Academy: I Have Arrived | Ryan Wilson](https://medium.com/@wilson.ryan.d/wudang-taoist-wellness-academy-i-have-arrived-6e98bd47da55)
+- [A Wandering Taoist | Ryan Wilson](https://medium.com/@wilson.ryan.d/a-wandering-taoist-fee970ede439)
+`
+  .trim()
+  .split("\n")
+  .map((line) => {
+    const match = line.match(/\[([^\]]+)\]\(([^)]+)\)/);
+    return match ? `<a href="${match[2]}" title="${match[1]}">*</a>` : null;
+  })
+  .filter((obj) => obj !== null);
+
+// shuffle
+for (let i = gumboLinks.length - 1; i > 0; i--) {
+  const j = Math.floor(Math.random() * (i + 1));
+  [gumboLinks[i], gumboLinks[j]] = [gumboLinks[j], gumboLinks[i]];
+}
+
+const gumboAnchorString = gumboLinks.join(" ");
+---
+
+<Layout pageTitle={"Links"}>
+  <Markdown
+    of={`
+This page contains some misc links from around the internet that I think are worth sharing with others. They're not ordered in any specific way. This is in a perennial *work in progress* state, and I'll be adding to it as time goes by.
+
+### Blogs
+You can see my current blogroll [here](https://mire.meadowing.club/u/meadow/blogroll).
+
+### Cool Posts Gumbo
+I've given some thought to the problem of how to best show a bunch of links without them being too noisy. I eventually landed on the idea of just shuffling all of them together so you don't know what you're going to get!
+
+<div>
+${gumboAnchorString}
+</div>
+
+
+### Videos
+
+- [The creative act of listening to a talking frog | Kermit The Frog](https://youtu.be/zX7vQ2QB6Eo?si=4U_ztQ262d6YtdZr) — _Kermit The Frog_ gives a TED talk about the magical act of listening and telling stories, and what it means to be human.
+- [Kurt Vonnegut lecture on writing and storytelling](https://youtu.be/4_RUgnC1lm8?si=ufJmOyy9XESQ3h-Y) — Wonderful lecture by Kurt Vonnegut. He goes on to talk about life and writing but doesn't really say anything concrete. However, in so doing he says everything there is to say.
+- [How To Be Positive | by Ajahn Brahm | 17 Oct 2008](https://www.youtube.com/watch?v=H94Dz4Iq2d4) — Very entertaining talk around the topic of happiness, and the need to be kind to ourselves. *Ajahn Brahm* is an awesome speaker, and his talks are a mix between Buddhist philosophy and stand-up comedy.
+- [10 Years with Hayao Miyazaki](https://www3.nhk.or.jp/nhkworld/en/ondemand/program/video/10yearshayaomiyazaki/?type=tvEpisode&) — Wonderful glimpse into the mind and creative process of Hayao Miyazaki. For me it was eye opening to the fact that we only ever see the final result but there's a lot of unseen effort and determination that happens in the background. In the documentary we see that Miyazaki-san is just a normal human being, with his ups and downs, but what really sets him apart is his unwavering dedication to the creative process. ([Part 1](https://www3.nhk.or.jp/nhkworld/en/ondemand/video/3004569/) | [Part 2](https://www3.nhk.or.jp/nhkworld/en/ondemand/video/3004581/) | [Part 3](https://www3.nhk.or.jp/nhkworld/en/ondemand/video/3004593/) | [Part 4](https://www3.nhk.or.jp/nhkworld/en/ondemand/video/3004594/) | [archive.org link](https://archive.org/details/10-years-with-hayao-miyazaki))
+- [Henning Ohlenbusch - Maybe I'm Not Meant To Do Anything Remarkable After All](https://www.youtube.com/watch?v=0-_SPOmEHp4) — A song (perhaps I should make a separate music category?), about being unremarkable. Be ok with who you are, don't put unnecessary pressure on yourself. There's no need to be *great* in the eyes of society.
+
+### Games
+
+- [Stardew Valley](https://www.stardewvalley.net/) — Cozy farming simulator with deep mechanics and wonderful stories.
+- [Celeste](https://www.celestegame.com/) — A *brutal* game of skill, with a heartwarming story of self-discovery and acceptance.
+
+### Books
+
+- **Favorite books to read by the fire**
+	- *Lord of the Rings* (and accompanying legendarium) by J. R. R. Tolkien
+	- *Kingkiller Chronicles* by Patrick Rothfuss.
+	- *The Way of Kings* (and greater *Stormlight Archive*) by Brandon Sanderson
+	- *Hitchhiker Guide to the Galaxy* by Douglas Adams
+	- *Fahrenheit 451* by Ray Bradbury
+	- *Wheel of Time* by Robert Jordan. A bit long but worth it.
+- **Comfort books (as in *comfort food*)**
+	- All and every *Discworld* book but especially: [Wyrd Sisters](https://en.wikipedia.org/wiki/Wyrd_Sisters), [The Last Hero](https://en.wikipedia.org/wiki/The_Last_Hero), [Thief of Time](https://en.wikipedia.org/wiki/Thief_of_Time), [Mort](https://en.wikipedia.org/wiki/Mort), [Reaper Man](https://en.wikipedia.org/wiki/Reaper_Man), [Hogfather](https://en.wikipedia.org/wiki/Hogfather), [Interesting Times](https://en.wikipedia.org/wiki/Interesting_Times), [The Truth](https://en.wikipedia.org/wiki/The_Truth_(novel)), [Equal Rites](https://en.wikipedia.org/wiki/Equal_Rites)
+	- *Harry Potter*. Rowling's view on certain topics is dubious, but I can't argue with the genius of this story.
+- **Other great reads**
+	- *American Gods* by Neil Gaiman
+	- *Kaiju Preservation Society* by John Scalzi
+	- *The Lady Astronaut* series by Mary Robinette Kowal
+	- *Stranger in a Strange Land* by Robert A. Heinlein
+	- *The Abhorsen* series by Garth Nix
+	- *Eragon* by Christopher Paolini
+	- *Good Omens* by Terry Pratchett and Neil Gaiman
+	- *Rivers of London* series by Ben Aaronovitch
+	- *Skyward* series by Brandon Sanderson
+	- *Tress of the Emerald Sea* also by Brandon Sanderson
+- **Inspiration**
+	- *Zen in the Art of Writing* by Ray Bradbury
+	- *The Book of Tea* by Kakuzō Okakura
+	- *Be Here Now* by Ram Dass
+	- *The Death of Ivan Ilyich* by Leo Tolstoy
+- **Short stories**
+	- *M is for Magic* by Niel Gaiman
+
+`}
+  />
+</Layout>
