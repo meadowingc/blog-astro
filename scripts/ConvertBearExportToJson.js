@@ -43,7 +43,7 @@ allPages
     const linkPattern = /href="\/([^"]+)"/g;
     page.content = page.content.replace(linkPattern, (match, slug) => {
       slug = slug.replace(/\/$/, "");
-      if (slugToPage[slug]) {
+      if (slugToPage[slug] && !slugToPage[slug]["is page"]) {
         return `href="/blog/${slug}"`;
       }
       return match;
