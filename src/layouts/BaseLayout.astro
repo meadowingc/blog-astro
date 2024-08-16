@@ -1,6 +1,5 @@
 ---
 const { pageTitle } = Astro.props;
-
 ---
 
 <!doctype html>
@@ -10,26 +9,29 @@ const { pageTitle } = Astro.props;
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width" />
     <meta name="generator" content={Astro.generator} />
-    <link rel="shortcut icon" type="image/svg+xml"
-      href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Ctext%20y='.9em'%20font-size='90'%3E🌱%3C/text%3E%3C/svg%3E">
+    <link
+      rel="shortcut icon"
+      type="image/svg+xml"
+      href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Ctext%20y='.9em'%20font-size='90'%3E🌱%3C/text%3E%3C/svg%3E"
+    />
     <link rel="sitemap" href="/sitemap-index.xml" />
     <link
-        rel="alternate"
-        type="application/rss+xml"
-        title="Meadow — Main Feed"
-        href={new URL("feed/main_rss.xml", Astro.site)}
+      rel="alternate"
+      type="application/rss+xml"
+      title="Meadow — Main Feed"
+      href={new URL("feed/main_rss.xml", Astro.site)}
     />
     <title>{pageTitle} | Meadow</title>
   </head>
   <body>
     <script>
-      import * as swetrix from "../utils/swetrix";
-      document.addEventListener('DOMContentLoaded', function() {
-        swetrix.init('QDMRj9JrNEnq', {
-          apiURL: 'https://analytics-api.meadow.cafe/log',
+      import * as Swetrix from "swetrix";
+      document.addEventListener("DOMContentLoaded", function () {
+        Swetrix.init("QDMRj9JrNEnq", {
+          apiURL: "https://analytics-api.meadow.cafe/log",
         });
-        swetrix.trackViews(null);
-      })
+        Swetrix.trackViews();
+      });
     </script>
 
     <noscript>
@@ -48,9 +50,8 @@ const { pageTitle } = Astro.props;
   html {
     font-family: sans-serif;
     -ms-text-size-adjust: 100%;
-    -webkit-text-size-adjust: 100%
+    -webkit-text-size-adjust: 100%;
   }
-
 
   :root {
     --width: 720px;
@@ -97,7 +98,12 @@ const { pageTitle } = Astro.props;
     color: var(--text-color);
   }
 
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     font-family: var(--font-main);
     color: var(--heading-color);
   }
@@ -116,7 +122,8 @@ const { pageTitle } = Astro.props;
     margin-right: 8px;
   }
 
-  strong, b {
+  strong,
+  b {
     color: var(--heading-color);
   }
 
@@ -130,14 +137,14 @@ const { pageTitle } = Astro.props;
     border-bottom: dotted;
   }
 
-
   main {
     line-height: 1.6;
     border-bottom: dotted;
     padding-bottom: 1.2em;
   }
 
-  em, i {
+  em,
+  i {
     color: var(--em-color);
   }
 
@@ -194,7 +201,8 @@ const { pageTitle } = Astro.props;
     width: auto !important;
   }
 
-  .highlight, .code {
+  .highlight,
+  .code {
     padding: 1px 15px;
     background-color: var(--code-background-color);
     color: var(--code-color);
