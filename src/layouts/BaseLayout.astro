@@ -1,5 +1,6 @@
 ---
 const { pageTitle } = Astro.props;
+
 ---
 
 <!doctype html>
@@ -19,10 +20,27 @@ const { pageTitle } = Astro.props;
         href={new URL("feed/main_rss.xml", Astro.site)}
     />
     <title>{pageTitle} | Meadow</title>
-    <script defer src="https://analytics.meadow.cafe/script.js"></script>
   </head>
   <body>
-        <slot />
+    <script>
+      import * as swetrix from "../utils/swetrix";
+      document.addEventListener('DOMContentLoaded', function() {
+        swetrix.init('QDMRj9JrNEnq', {
+          apiURL: 'https://analytics-api.meadow.cafe/log',
+        });
+        swetrix.trackViews(null);
+      })
+    </script>
+
+    <noscript>
+      <img
+        src="https://analytics-api.meadow.cafe/log/noscript?pid=QDMRj9JrNEnq"
+        alt=""
+        referrerpolicy="no-referrer-when-downgrade"
+      />
+    </noscript>
+
+    <slot />
   </body>
 </html>
 
@@ -38,7 +56,7 @@ const { pageTitle } = Astro.props;
     --width: 720px;
     --font-main: Verdana, sans-serif;
     --font-secondary: Verdana, sans-serif;
-    // --font-secondary: adobe-garamond-pro;
+    /* --font-secondary: adobe-garamond-pro; */
     --font-scale: 1em;
     --background-color: #fffcfa;
     --heading-color: #555;
