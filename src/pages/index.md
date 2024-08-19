@@ -3,6 +3,12 @@ title: 'Home'
 layout: ../layouts/MarkdownPageLayout.astro
 ---
 
+---
+
+> !!!! Note !!!! This is an experiment I'm doing whose goal is porting my blog to [Astro](https://astro.build/). It's a work in progress, and my main blog is still hosted on Bear [meadow.bearblog.dev](https://meadow.bearblog.dev/). You're free to peruse this site as much as you want, but please don't subscribe to the RSS feeds since I'll likely be changing the URLs in the future. 
+
+---
+
 Hi 🍃 Thanks for coming to my blog! My main goal here is to discover how I can be more authentic to myself through explorations in writing. I also write because I believe blogs are great at making us appreciate more what we have in common, rather than highlighting our differences.
 
 I've been struggling to think what this blog is actually about, but the truth is that I myself don't know. I write frequently, about whatever topic strikes my fancy. I've noticed that lately I write a lot about writing, blogging, reflecting on the past (or future), on society, on the mind, a little bit about parenting, plus the odd topic here and there. I think I take myself too seriously, which is something I'm trying to undo.
