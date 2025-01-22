@@ -2,17 +2,10 @@
 import { getCollection } from "astro:content";
 import Layout from "../../layouts/Layout.astro";
 
-const allPosts = (await getCollection("bear_export"))
-  .map((postCol: any) => {
-    const post = postCol.data;
-    post["published date"] = new Date(post["published date"]);
-    post["last modified"] = new Date(post["last modified"]);
-    post["first published at"] = new Date(post["last modified"]);
-
-    return post;
-  })
-  .filter((post: any) => post.publish && !post["is page"])
-  .sort((a: any, b: any) => b["published date"] - a["published date"]);
+const allPosts = (await getCollection("kittyPosts"))
+  .map((col) => col.data)
+  .filter((post: any) => post.Published && !post.IsPage)
+  .sort((a: any, b: any) => b.PublishedDate - a.PublishedDate);
 ---
 
 <Layout pageTitle={"Blog"}>
@@ -22,13 +15,13 @@ const allPosts = (await getCollection("bear_export"))
   <ul class="embedded blog-posts">
     {
       allPosts
-        .filter((st: any) => st.slug)
+        .filter((st: any) => st.Slug)
         .map((st: any) => (
           <li>
             <span>
               <i>
-                <time datetime={st["published date"].toISOString()}>
-                  {st["published date"].toLocaleDateString("en-US", {
+                <time datetime={st.PublishedDate.toISOString()}>
+                  {st.PublishedDate.toLocaleDateString("en-US", {
                     year: "numeric",
                     month: "short",
                     day: "numeric",
@@ -36,7 +29,7 @@ const allPosts = (await getCollection("bear_export"))
                 </time>
               </i>
             </span>
-            <a href={st.slug}>{st.title}</a>
+            <a href={`/blog/${st.Slug}`}>{st.Title}</a>
           </li>
         ))
     }

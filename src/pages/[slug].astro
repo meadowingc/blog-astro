@@ -1,0 +1,26 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { getCollection } from "astro:content";
+
+export async function getStaticPaths() {
+  return (await getCollection("kittyPosts"))
+    .map((col) => col.data)
+    .filter((post: any) => post.Published && post.IsPage)
+    .map((page: any) => {
+      return {
+        params: { slug: `${page.Slug}` },
+        props: { page: page },
+      };
+    });
+}
+
+interface Props {
+  page: any;
+}
+
+const { page } = Astro.props;
+---
+
+<Layout pageTitle={page.Title}>
+  <article set:html={page.Body} />
+</Layout>

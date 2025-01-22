@@ -1,0 +1,38 @@
+---
+import { getCollection } from "astro:content";
+import Layout from "../../layouts/Layout.astro";
+
+const allTags = (await getCollection("kittyPosts"))
+  .map((col) => col.data)
+  .filter((post) => post.Slug && post.Published)
+  .map((post) => post.Tags)
+  .flat()
+  .sort();
+
+const tags = Array.from(new Set(allTags));
+
+const tagCounts = tags.reduce((acc, tag) => {
+  acc[tag] = allTags.filter((t) => t === tag).length;
+  return acc;
+}, {});
+---
+
+<Layout pageTitle={"Tags"}>
+  <h1 id="tags">Tags</h1>
+
+  <p></p>
+  <p>
+    <a href="/blog"> Back to blog </a>
+  </p>
+  <p></p>
+
+  <ul class="embedded tags">
+    {
+      tags.map((tag) => (
+        <li>
+          <a href={`/tags/${tag}`}>{tag}</a> ({tagCounts[tag]})
+        </li>
+      ))
+    }
+  </ul>
+</Layout>

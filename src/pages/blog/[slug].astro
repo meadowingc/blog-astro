@@ -3,16 +3,12 @@ import Layout from "../../layouts/Layout.astro";
 import { getCollection } from "astro:content";
 
 export async function getStaticPaths() {
-  return (await getCollection("bear_export"))
+  return (await getCollection("kittyPosts"))
     .map((col) => col.data)
-    .filter((post: any) => post.publish && !post["is page"])
+    .filter((post: any) => post.Published && !post.IsPage)
     .map((post: any) => {
-      post["published date"] = new Date(post["published date"]);
-      post["last modified"] = new Date(post["last modified"]);
-      post["first published at"] = new Date(post["last modified"]);
-
       return {
-        params: { slug: `${post.slug}` },
+        params: { slug: `${post.Slug}` },
         props: { post: post },
       };
     });
@@ -26,13 +22,13 @@ interface Props {
 const { post } = Astro.props;
 ---
 
-<Layout pageTitle={post.title}>
-  <h1>{post.title}</h1>
+<Layout pageTitle={post.Title}>
+  <h1>{post.Title}</h1>
   <p>
     <i>
-      <time datetime={post["published date"].toISOString()}>
+      <time datetime={post.PublishedDate.toISOString()}>
         {
-          post["published date"].toLocaleDateString("en-US", {
+          post.PublishedDate.toLocaleDateString("en-US", {
             year: "numeric",
             month: "short",
             day: "numeric",
@@ -42,7 +38,15 @@ const { post } = Astro.props;
     </i>
   </p>
 
-  <article set:html={post.content} />
+  <article set:html={post.Body} />
+
+  <p>
+    {
+      post.Tags.map((tag: string) =>
+        /* prettier-ignore */ <a class="tag-link" href={`/tags/${tag}`}>#{tag}</a>
+      )
+    }
+  </p>
 
   <!-- {
     Object.keys(post).map((key) => (
@@ -52,3 +56,9 @@ const { post } = Astro.props;
     ))
   } -->
 </Layout>
+
+<style>
+  .tag-link {
+    margin-right: 0.5rem;
+  }
+</style>
