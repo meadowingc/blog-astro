@@ -29,9 +29,9 @@ const { post } = Astro.props;
       <time datetime={post.PublishedDate.toISOString()}>
         {
           post.PublishedDate.toLocaleDateString("en-US", {
-            year: "numeric",
             month: "short",
             day: "numeric",
+            year: "numeric",
           })
         }
       </time>

@@ -1,0 +1,42 @@
+---
+import { getCollection } from "astro:content";
+import Layout from "../layouts/Layout.astro";
+
+const posts = await getCollection("kittyPosts");
+
+// it could be that someone is getting to this page by following one of the old
+// post slugs from Bearblog. If so, we should redirect them to the new URL.
+const postSlugs = posts.map((post) => post.data.Slug);
+---
+
+<Layout pageTitle="Not Found">
+  <h1>404: Page Not Found</h1>
+  <p>The page you're looking for does not exist or has been moved somewhere else.</p>
+
+  <div id="redirect-suggestion-box"></div>
+
+  <div data-post-slugs={JSON.stringify(postSlugs)} id="post-slugs"></div>
+</Layout>
+
+<script>
+  const postSlugs = JSON.parse(document.getElementById("post-slugs")?.getAttribute("data-post-slugs") ?? "[]");
+
+  const urlParts = window.location.pathname.split("/");
+  const currentPath = urlParts[urlParts.length - 1];
+  const matchingSlug = postSlugs.find((slug) => slug === currentPath);
+
+  if (matchingSlug) {
+    const redirectSuggestionBox = document.getElementById("redirect-suggestion-box");
+    const newPostUrl = `${window.location.origin}/blog/${matchingSlug}`;
+
+    redirectSuggestionBox!.innerHTML = `
+      <hr>
+      <h3>!! Maybe we know where you want to go !!</h3>
+      <p>It looks like you're trying to access an old post. We think we know where it is now:</p>
+      <p><a href="${newPostUrl}">${newPostUrl}</a></p>
+    `;
+  }
+
+  // if we're here, it means the user is not following an old post slug
+  // so we can just show the 404 page
+</script>

@@ -19,8 +19,9 @@ const { pageTitle } = Astro.props;
       rel="alternate"
       type="application/rss+xml"
       title="Meadow — Main Feed"
-      href={new URL("feed/main_rss.xml", Astro.site)}
+      href={new URL("feeds/main_rss.xml", Astro.site)}
     />
+    <script defer src="https://cloud.umami.is/script.js" data-website-id="6268c35c-cb6b-4698-a4b9-dd3010003ab1"></script>
     <title>{pageTitle} | Meadow</title>
   </head>
   <body>
