@@ -74,4 +74,20 @@ const remainingPhotos = minimalPhotoData.slice(20); // Remaining photos
     width: 100%;
     display: block;
   }
+
+  @media (max-width: 768px) {
+    .masonry {
+      column-count: 2;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .masonry {
+      column-count: 1;
+    }
+
+    .masonry-item {
+      padding: 0 0.5rem;
+    }
+  }
 </style>

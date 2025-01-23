@@ -1,12 +1,13 @@
 ---
 import Layout from "../../layouts/Layout.astro";
 import { getCollection } from "astro:content";
+import type { KittyPost } from "../../schemas";
 
 export async function getStaticPaths() {
   const allPosts = (await getCollection("kittyPosts"))
     .map((col) => col.data)
-    .filter((post: any) => post.Slug && post.Published)
-    .sort((a: any, b: any) => b.PublishedDate - a.PublishedDate);
+    .filter((post) => post.Slug && post.Published)
+    .sort((a, b) => b.PublishedDate!.getTime() - a.PublishedDate!.getTime());
 
   const allTags = allPosts
     .map((post) => post.Tags)
@@ -25,7 +26,7 @@ export async function getStaticPaths() {
 }
 
 interface Props {
-  posts: any;
+  posts: KittyPost[];
   tag: string;
 }
 

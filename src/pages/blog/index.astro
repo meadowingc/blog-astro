@@ -4,8 +4,8 @@ import Layout from "../../layouts/Layout.astro";
 
 const allPosts = (await getCollection("kittyPosts"))
   .map((col) => col.data)
-  .filter((post: any) => post.Published && !post.IsPage)
-  .sort((a: any, b: any) => b.PublishedDate - a.PublishedDate);
+  .filter((post) => post.Published && !post.IsPage)
+  .sort((a, b) => b.PublishedDate!.getTime() - a.PublishedDate!.getTime());
 ---
 
 <Layout pageTitle={"Blog"}>
@@ -15,13 +15,13 @@ const allPosts = (await getCollection("kittyPosts"))
   <ul class="embedded blog-posts">
     {
       allPosts
-        .filter((st: any) => st.Slug)
-        .map((st: any) => (
+        .filter((st) => st.Slug)
+        .map((st) => (
           <li>
             <span>
               <i>
-                <time datetime={st.PublishedDate.toISOString()}>
-                  {st.PublishedDate.toLocaleDateString("en-US", {
+                <time datetime={st.PublishedDate!.toISOString()}>
+                  {st.PublishedDate!.toLocaleDateString("en-US", {
                     year: "numeric",
                     month: "short",
                     day: "numeric",

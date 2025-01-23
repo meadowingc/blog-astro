@@ -5,8 +5,9 @@ import { Marked } from "marked";
 import markedFootnote from "marked-footnote";
 import os from "os";
 import path from "path";
+import { BlueskyImageSchema, KittyPostSchema } from "./schemas";
 
-const CACHE_DURATION = 60 * 60 * 1000; // 1 hour in milliseconds
+const CACHE_DURATION = 5 * 60 * 60 * 1000; // hours in milliseconds
 const KITTY_CACHE_FILE_PATH = path.join(os.tmpdir(), "AstroBlog__KittyPostsCache.json");
 const BLUESKY_IMAGES_CACHE_FILE_PATH = path.join(os.tmpdir(), "AstroBlog__BlueskyImagesCache.json");
 
@@ -101,24 +102,7 @@ const blueskyImages = defineCollection({
 
     return convertedPosts;
   },
-  schema: z.object({
-    id: z.string(),
-    text: z.string(),
-    postUrl: z.string(),
-    createdAt: z.coerce.date(),
-    isReplyToAnotherPost: z.boolean(),
-    images: z.array(
-      z.object({
-        alt: z.string(),
-        fullsize: z.string(),
-        thumb: z.string(),
-        aspectRatio: z.object({
-          width: z.number(),
-          height: z.number(),
-        }),
-      }),
-    ),
-  }),
+  schema: BlueskyImageSchema,
 });
 
 const kittyPosts = defineCollection({
@@ -163,7 +147,7 @@ const kittyPosts = defineCollection({
 
       page.Body = page.Body.replace(linkPattern, (match, slug) => {
         slug = slug.replace(/\/$/, "");
-        if (slugToPage[slug] && !slugToPage[slug]["is page"]) {
+        if (slugToPage[slug] && !slugToPage[slug].IsPage) {
           return `href="/blog/${slug}"`;
         }
         return match;
@@ -179,23 +163,7 @@ const kittyPosts = defineCollection({
 
     return pagesWithProperLinks;
   },
-  schema: z.object({
-    ID: z.string(),
-    CreatedAt: z.coerce.date(),
-    UpdatedAt: z.coerce.date(),
-    DeletedAt: z.coerce.date().optional(),
-    AdminUserID: z.number(),
-    Title: z.string(),
-    Body: z.string(),
-    Slug: z.string(),
-    PublishedDate: z.coerce.date().optional(),
-    IsPage: z.boolean(),
-    MetaDescription: z.string().optional(),
-    MetaImage: z.string().optional(),
-    Lang: z.string(),
-    Tags: z.array(z.string()),
-    Published: z.boolean(),
-  }),
+  schema: KittyPostSchema,
 });
 
 export const collections = {

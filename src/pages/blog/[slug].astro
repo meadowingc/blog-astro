@@ -1,12 +1,13 @@
 ---
-import Layout from "../../layouts/Layout.astro";
 import { getCollection } from "astro:content";
+import Layout from "../../layouts/Layout.astro";
+import type { KittyPost } from "../../schemas";
 
 export async function getStaticPaths() {
   return (await getCollection("kittyPosts"))
     .map((col) => col.data)
-    .filter((post: any) => post.Published && !post.IsPage)
-    .map((post: any) => {
+    .filter((post) => post.Published && !post.IsPage)
+    .map((post) => {
       return {
         params: { slug: `${post.Slug}` },
         props: { post: post },
@@ -15,7 +16,7 @@ export async function getStaticPaths() {
 }
 
 interface Props {
-  post: any;
+  post: KittyPost;
 }
 
 // const { slug } = Astro.params;
@@ -26,9 +27,9 @@ const { post } = Astro.props;
   <h1>{post.Title}</h1>
   <p>
     <i>
-      <time datetime={post.PublishedDate.toISOString()}>
+      <time datetime={post.PublishedDate!.toISOString()}>
         {
-          post.PublishedDate.toLocaleDateString("en-US", {
+          post.PublishedDate!.toLocaleDateString("en-US", {
             month: "short",
             day: "numeric",
             year: "numeric",
@@ -41,11 +42,7 @@ const { post } = Astro.props;
   <article set:html={post.Body} />
 
   <p>
-    {
-      post.Tags.map((tag: string) =>
-        /* prettier-ignore */ <a class="tag-link" href={`/tags/${tag}`}>#{tag}</a>
-      )
-    }
+    {post.Tags.map((tag: string) => /* prettier-ignore */ <a class="tag-link" href={`/tags/${tag}`}>#{tag}</a>)}
   </p>
 
   <!-- {
