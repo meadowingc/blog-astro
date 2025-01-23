@@ -2,11 +2,9 @@
 import { getCollection } from "astro:content";
 import Layout from "../../layouts/Layout.astro";
 
-const allTags = (await getCollection("kittyPosts"))
+const allTags = (await getCollection("obsidianPublishedPosts"))
   .map((col) => col.data)
-  .filter((post) => post.Slug && post.Published)
-  .map((post) => post.Tags)
-  .flat()
+  .flatMap((post) => post.tags)
   .sort();
 
 const tags = Array.from(new Set(allTags));

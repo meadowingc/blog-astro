@@ -2,6 +2,8 @@ import { z } from "astro:content";
 
 export type BlueskyImage = z.infer<typeof BlueskyImageSchema>;
 export type KittyPost = z.infer<typeof KittyPostSchema>;
+export type ObsidianPost = z.infer<typeof ObsidianPostSchema>;
+export type ObsidianPage = z.infer<typeof ObsidianPageSchema>;
 
 export const BlueskyImageSchema = z.object({
   id: z.string(),
@@ -39,3 +41,37 @@ export const KittyPostSchema = z.object({
   Tags: z.array(z.string()),
   Published: z.boolean(),
 });
+
+// {
+//   id: file,
+//   title: frontMatter.title,
+//   slug: frontMatter.slug,
+//   publishedAt: frontMatter.publishedAt,
+//   tags: frontMatter.tags || [],
+//   body: body,
+//   metaDescription: frontMatter.metaDescription,
+//   metaImage: frontMatter.metaImage,
+// };
+
+export const ObsidianPostSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  slug: z.string(),
+  filename: z.string(),
+  publishedAt: z.coerce.date(),
+  tags: z.array(z.string()),
+  body: z.string(),
+  metaDescription: z.string().optional(),
+  metaImage: z.string().optional(),
+});
+
+export const ObsidianPageSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  slug: z.string(),
+  filename: z.string(),
+  body: z.string(),
+  metaDescription: z.string().optional(),
+  metaImage: z.string().optional(),
+});
+

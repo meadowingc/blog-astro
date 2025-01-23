@@ -1,27 +1,26 @@
 ---
-import Layout from "../layouts/Layout.astro";
 import { getCollection } from "astro:content";
-import type { KittyPost } from "../schemas";
+import Layout from "../layouts/Layout.astro";
+import type { ObsidianPost } from "../schemas";
 
 export async function getStaticPaths() {
-  return (await getCollection("kittyPosts"))
+  return (await getCollection("obsidianPublishedPosts"))
     .map((col) => col.data)
-    .filter((post) => post.Published && post.IsPage)
     .map((page) => {
       return {
-        params: { slug: `${page.Slug}` },
+        params: { slug: `${page.slug}` },
         props: { page: page },
       };
     });
 }
 
 interface Props {
-  page: KittyPost;
+  page: ObsidianPost;
 }
 
 const { page } = Astro.props;
 ---
 
-<Layout pageTitle={page.Title}>
-  <article set:html={page.Body} />
+<Layout pageTitle={page.title}>
+  <article set:html={page.body} />
 </Layout>

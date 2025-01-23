@@ -2,11 +2,11 @@
 import { getCollection } from "astro:content";
 import Layout from "../layouts/Layout.astro";
 
-const posts = await getCollection("kittyPosts");
+const posts = await getCollection("obsidianPublishedPosts");
 
 // it could be that someone is getting to this page by following one of the old
 // post slugs from Bearblog. If so, we should redirect them to the new URL.
-const postSlugs = posts.map((post) => post.data.Slug);
+const postSlugs = posts.map((post) => post.data.slug);
 ---
 
 <Layout pageTitle="Not Found">
@@ -23,7 +23,7 @@ const postSlugs = posts.map((post) => post.data.Slug);
 
   const urlParts = window.location.pathname.split("/");
   const currentPath = urlParts[urlParts.length - 1];
-  const matchingSlug = postSlugs.find((slug) => slug === currentPath);
+  const matchingSlug = postSlugs.find((slug: string) => slug === currentPath);
 
   if (matchingSlug) {
     const redirectSuggestionBox = document.getElementById("redirect-suggestion-box");

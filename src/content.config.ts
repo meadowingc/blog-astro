@@ -5,13 +5,100 @@ import { Marked } from "marked";
 import markedFootnote from "marked-footnote";
 import os from "os";
 import path from "path";
-import { BlueskyImageSchema, KittyPostSchema } from "./schemas";
+import { BlueskyImageSchema, KittyPostSchema, ObsidianPageSchema, ObsidianPostSchema } from "./schemas";
+import * as matter from "gray-matter";
+import { DateTime } from "luxon";
 
 const CACHE_DURATION = 5 * 60 * 60 * 1000; // hours in milliseconds
 const KITTY_CACHE_FILE_PATH = path.join(os.tmpdir(), "AstroBlog__KittyPostsCache.json");
 const BLUESKY_IMAGES_CACHE_FILE_PATH = path.join(os.tmpdir(), "AstroBlog__BlueskyImagesCache.json");
 
+async function loadDataPostsInFolder(
+  folderPath: string,
+  needsPublishedDate: boolean,
+): Promise<{ id: string; body: string; [key: string]: any }[]> {
+  const baseObsidianPath = path.resolve("../obsidian-brain/Brian/");
+  const actualFolderPath = path.resolve(path.join(baseObsidianPath, folderPath));
+  const markdownFiles = fs.readdirSync(actualFolderPath).filter((file) => file.endsWith(".md"));
+
+  console.log(`Found ${markdownFiles.length} markdown files under Obsidian folder: ${folderPath}`);
+
+  const markedParser = new Marked().use(markedFootnote());
+
+  return await Promise.all(
+    markdownFiles.map(async (file) => {
+      const postContent = fs.readFileSync(path.join(actualFolderPath, file), "utf-8");
+
+      const grayMatterParsed = matter.default(postContent);
+      const frontMatter = grayMatterParsed.data;
+
+      let body = markedParser.parse(grayMatterParsed.content);
+
+      //  await if body is a promise
+      if (body instanceof Promise) {
+        body = await body;
+      }
+
+      // wallback title
+      frontMatter.title ||= file.replace(/\.md$/, "");
+
+      if (needsPublishedDate) {
+        if (!frontMatter.publishedAt) {
+          throw new Error(`Item '${file}' does not have a publishedAt date!`);
+        }
+
+        frontMatter.publishedAt = frontMatter.publishedAt.trim().replace("−", "-");
+
+        const parsedDate = DateTime.fromFormat(frontMatter.publishedAt, "yyyy-MM-dd HH:mm:ss 'GMT'ZZ", { zone: "utc" });
+        if (!parsedDate.isValid) {
+          throw new Error(`Invalid PublishedDate format for post with title "${frontMatter.title}": ${frontMatter.publishedAt}`);
+        }
+        frontMatter.publishedAt = parsedDate.toJSDate();
+      }
+
+      if (!frontMatter.slug) {
+        function convertToSlug(Text) {
+          return Text.toLowerCase()
+            .replace(/[^\w ]+/g, "")
+            .replace(/ +/g, "-");
+        }
+
+        frontMatter.slug = convertToSlug(frontMatter.title);
+      }
+
+      return {
+        id: file,
+        filename: file,
+        body: body,
+        ...frontMatter,
+      };
+    }),
+  );
+}
+
+const obsidianPublishedPosts = defineCollection({
+  schema: ObsidianPostSchema,
+  loader: async () => {
+    console.log(">> Loading Obsidian Published Posts data");
+    return (await loadDataPostsInFolder("Blog/Published", true))
+      .map((post) => {
+        post.tags ||= [];
+        return post;
+      })
+      .sort((a, b) => b.publishedAt.getTime() - a.publishedAt.getTime());
+  },
+});
+
+const obsidianPublishedPages = defineCollection({
+  schema: ObsidianPageSchema,
+  loader: async () => {
+    console.log(">> Loading Obsidian Published Pages data");
+    return await loadDataPostsInFolder("Blog/Pages", false);
+  },
+});
+
 const blueskyImages = defineCollection({
+  schema: BlueskyImageSchema,
   loader: async () => {
     console.log(">> Loading Bluesky Images data");
 
@@ -102,10 +189,10 @@ const blueskyImages = defineCollection({
 
     return convertedPosts;
   },
-  schema: BlueskyImageSchema,
 });
 
 const kittyPosts = defineCollection({
+  schema: KittyPostSchema,
   loader: async () => {
     console.log(">> Loading Kitty data");
 
@@ -163,7 +250,6 @@ const kittyPosts = defineCollection({
 
     return pagesWithProperLinks;
   },
-  schema: KittyPostSchema,
 });
 
 export const collections = {
@@ -172,4 +258,6 @@ export const collections = {
   // 'authors': authors,
   kittyPosts,
   blueskyImages,
+  obsidianPublishedPosts,
+  obsidianPublishedPages,
 };

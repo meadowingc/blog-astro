@@ -1,35 +1,34 @@
 ---
 import { getCollection } from "astro:content";
 import Layout from "../../layouts/Layout.astro";
-import type { KittyPost } from "../../schemas";
+import type { ObsidianPost } from "../../schemas";
 
 export async function getStaticPaths() {
-  return (await getCollection("kittyPosts"))
+  return (await getCollection("obsidianPublishedPosts"))
     .map((col) => col.data)
-    .filter((post) => post.Published && !post.IsPage)
     .map((post) => {
       return {
-        params: { slug: `${post.Slug}` },
+        params: { slug: `${post.slug}` },
         props: { post: post },
       };
     });
 }
 
 interface Props {
-  post: KittyPost;
+  post: ObsidianPost;
 }
 
 // const { slug } = Astro.params;
 const { post } = Astro.props;
 ---
 
-<Layout pageTitle={post.Title}>
-  <h1>{post.Title}</h1>
+<Layout pageTitle={post.title}>
+  <h1>{post.title}</h1>
   <p>
     <i>
-      <time datetime={post.PublishedDate!.toISOString()}>
+      <time datetime={post.publishedAt.toISOString()}>
         {
-          post.PublishedDate!.toLocaleDateString("en-US", {
+          post.publishedAt.toLocaleDateString("en-US", {
             month: "short",
             day: "numeric",
             year: "numeric",
@@ -39,10 +38,10 @@ const { post } = Astro.props;
     </i>
   </p>
 
-  <article set:html={post.Body} />
+  <article set:html={post.body} />
 
   <p>
-    {post.Tags.map((tag: string) => /* prettier-ignore */ <a class="tag-link" href={`/tags/${tag}`}>#{tag}</a>)}
+    {post.tags.map((tag: string) => /* prettier-ignore */ <a class="tag-link" href={`/tags/${tag}`}>#{tag}</a>)}
   </p>
 
   <!-- {

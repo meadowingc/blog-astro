@@ -2,10 +2,9 @@ import rss from '@astrojs/rss';
 import { getCollection } from "astro:content";
 
 export async function GET(context) {
-  const bearPosts = (await getCollection("kittyPosts"))
+  const bearPosts = (await getCollection("obsidianPublishedPosts"))
     .map((col) => col.data)
-    .filter((post) => post.Published && !post.IsPage)
-    .sort((a, b) => b.PublishedDate - a.PublishedDate);
+    .sort((a, b) => b.publishedAt.getTime() - a.publishedAt.getTime());
 
   return rss({
     title: 'Meadow',
@@ -13,10 +12,10 @@ export async function GET(context) {
     site: context.site,
     stylesheet: '/rss/pretty-feed-v3.xsl',
     items: bearPosts.map((post) => ({
-      title: `${post.Title}`,
-      link: `/blog/${post.Slug}/`,
-      pubDate: post.PublishedDate,
-      description: post.Body,
+      title: `${post.title}`,
+      link: `/blog/${post.slug}/`,
+      pubDate: post.publishedAt,
+      description: post.body,
     })),
     // (optional) inject custom xml
     customData: `<language>en-us</language>`,
