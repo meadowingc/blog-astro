@@ -5,12 +5,11 @@ import { Marked } from "marked";
 import markedFootnote from "marked-footnote";
 import os from "os";
 import path from "path";
-import { BlueskyImageSchema, KittyPostSchema, ObsidianPageSchema, ObsidianPostSchema } from "./schemas";
+import { BlueskyImageSchema, ObsidianPageSchema, ObsidianPostSchema } from "./schemas";
 import * as matter from "gray-matter";
 import { DateTime } from "luxon";
 
 const CACHE_DURATION = 5 * 60 * 60 * 1000; // hours in milliseconds
-const KITTY_CACHE_FILE_PATH = path.join(os.tmpdir(), "AstroBlog__KittyPostsCache.json");
 const BLUESKY_IMAGES_CACHE_FILE_PATH = path.join(os.tmpdir(), "AstroBlog__BlueskyImagesCache.json");
 
 async function loadDataPostsInFolder(
@@ -191,72 +190,10 @@ const blueskyImages = defineCollection({
   },
 });
 
-const kittyPosts = defineCollection({
-  schema: KittyPostSchema,
-  loader: async () => {
-    console.log(">> Loading Kitty data");
-
-    if (fs.existsSync(KITTY_CACHE_FILE_PATH)) {
-      const stats = fs.statSync(KITTY_CACHE_FILE_PATH);
-      const now = new Date().getTime();
-      const cacheAge = now - stats.mtimeMs;
-
-      if (cacheAge < CACHE_DURATION) {
-        console.log(`Cache age: ${cacheAge}ms`);
-        console.log(`Using cached Bluesky data for content`);
-
-        return JSON.parse(fs.readFileSync(KITTY_CACHE_FILE_PATH, "utf-8"));
-      }
-    }
-
-    const data = await fetch("https://kitty.meadow.cafe/api/v1/get-user-posts-messages/1");
-
-    const allPages = (await data.json())
-      .filter((page) => page.Slug)
-      .map((page) => {
-        const markedParser = new Marked().use(markedFootnote());
-
-        page.ID = page.ID.toString();
-        page.id = page.ID;
-
-        page.Body = markedParser.parse(page.Body);
-
-        return page;
-      });
-
-    const slugToPage = allPages.reduce((acc, page) => {
-      acc[page.Slug] = page;
-      return acc;
-    }, {});
-
-    const pagesWithProperLinks = allPages.map((page) => {
-      const linkPattern = /href="\/([^"]+)"/g;
-
-      page.Body = page.Body.replace(linkPattern, (match, slug) => {
-        slug = slug.replace(/\/$/, "");
-        if (slugToPage[slug] && !slugToPage[slug].IsPage) {
-          return `href="/blog/${slug}"`;
-        }
-        return match;
-      });
-
-      return page;
-    });
-
-    console.log(`Loaded ${pagesWithProperLinks.length} pages from Kitty`);
-
-    console.log("Writing cache file");
-    fs.writeFileSync(KITTY_CACHE_FILE_PATH, JSON.stringify(pagesWithProperLinks));
-
-    return pagesWithProperLinks;
-  },
-});
-
 export const collections = {
   // 'blog': blogCollection,
   // 'newsletter': newsletter,
   // 'authors': authors,
-  kittyPosts,
   blueskyImages,
   obsidianPublishedPosts,
   obsidianPublishedPages,
