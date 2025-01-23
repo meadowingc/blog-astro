@@ -20,11 +20,14 @@ jobs:
     steps:
       - name: Checkout your repository using git
         uses: actions/checkout@v4
+        with:
+          path: astro-blog
 
       - name: Checkout Obsidian Brain to source posts
         uses: actions/checkout@v4  
         with:
           repository: meadowingc/obsidian-brain
+          path: obsidian-brain
           token: ${{ secrets.OBSIDIAN_ACCESS_TOKEN }}
 
       # list pwd and ls to debug
@@ -34,10 +37,15 @@ jobs:
           pwd
           echo "----- List files -----"
           ls -a
+          echo "----- List files in astro-blog -----"
+          ls -a astro-blog
+          echo "----- List files in obsidian-brain -----"
+          ls -a obsidian-brain
 
-      - name: Install, build, and upload your site
+      - name: Deploy the site
         uses: withastro/action@v2
-        # with:
+        with:
+          path: ./astro-blog
           # path: . # The root location of your Astro project inside the repository. (optional)
           # node-version: 20 # The specific version of Node that should be used to build your site. Defaults to 20. (optional)
           # package-manager: pnpm@latest # The Node package manager that should be used to install dependencies and build your site. Automatically detected based on your lockfile. (optional)
