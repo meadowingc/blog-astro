@@ -4,7 +4,7 @@ import Layout from "../layouts/Layout.astro";
 import type { ObsidianPost } from "../schemas";
 
 export async function getStaticPaths() {
-  return (await getCollection("obsidianPublishedPosts"))
+  return (await getCollection("obsidianPublishedPages"))
     .map((col) => col.data)
     .map((page) => {
       return {
