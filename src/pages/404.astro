@@ -21,7 +21,7 @@ const postSlugs = posts.map((post) => post.data.slug);
 <script>
   const postSlugs = JSON.parse(document.getElementById("post-slugs")?.getAttribute("data-post-slugs") ?? "[]");
 
-  const urlParts = window.location.pathname.split("/");
+  const urlParts = window.location.pathname.split("/").filter((part) => part !== "");
   const currentPath = urlParts[urlParts.length - 1];
   const matchingSlug = postSlugs.find((slug: string) => slug === currentPath);
 
