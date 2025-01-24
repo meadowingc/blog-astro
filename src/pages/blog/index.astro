@@ -5,22 +5,34 @@ import Layout from "../../layouts/Layout.astro";
 const allPosts = (await getCollection("obsidianPublishedPosts"))
   .map((col) => col.data)
   .sort((a, b) => b.publishedAt.getTime() - a.publishedAt.getTime());
+
+const recentPosts = allPosts.slice(0, 10);
+const favoritePosts = allPosts.filter((post) => post.isFavorite);
 ---
+
+<style>
+  .tag-link {
+    margin-right: 0.4rem;
+  }
+</style>
 
 <Layout pageTitle={"Blog"}>
   <h1 id="blog">Blog</h1>
-  <p></p>
 
-  <ul class="embedded blog-posts">
-    {
-      allPosts
-        .filter((st) => st.slug)
-        .map((st) => (
+  <p>
+    For all my blog posts, please see the archive page <a href="/blog/archive">here</a>.
+  </p>
+
+  <section>
+    <h2>Recent Posts</h2>
+    <ul class="embedded blog-posts">
+      {
+        recentPosts.map((post) => (
           <li>
             <span>
               <i>
-                <time datetime={st.publishedAt.toISOString()}>
-                  {st.publishedAt.toLocaleDateString("en-US", {
+                <time datetime={post.publishedAt.toISOString()}>
+                  {post.publishedAt.toLocaleDateString("en-US", {
                     year: "numeric",
                     month: "short",
                     day: "numeric",
@@ -28,9 +40,49 @@ const allPosts = (await getCollection("obsidianPublishedPosts"))
                 </time>
               </i>
             </span>
-            <a href={`/blog/${st.slug}`}>{st.title}</a>
+            <a href={`/blog/${post.slug}`}>{post.title}</a>
           </li>
         ))
-    }
-  </ul>
+      }
+    </ul>
+  </section>
+
+  {
+    favoritePosts.length > 0 && (
+      <section>
+        <h2>Favorite Posts</h2>
+        <ul class="embedded blog-posts">
+          {favoritePosts.map((post) => (
+            <li>
+              <span>
+                <i>
+                  <time datetime={post.publishedAt.toISOString()}>
+                    {post.publishedAt.toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                    })}
+                  </time>
+                </i>
+              </span>
+              <a href={`/blog/${post.slug}`}>{post.title}</a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
+
+  <section>
+    <h2>Tags</h2>
+    <p>
+      {
+        allPosts
+          .flatMap((post) => post.tags)
+          .filter((tag, index, array) => array.indexOf(tag) === index)
+          .sort()
+          .map((tag) => /* prettier-ignore */ <a class="tag-link" href={`/tags/${tag}`}>#{tag}</a>)
+      }
+    </p>
+  </section>
 </Layout>

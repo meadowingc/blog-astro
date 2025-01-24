@@ -29,6 +29,7 @@ export const ObsidianPostSchema = z.object({
   slug: z.string(),
   filename: z.string(),
   publishedAt: z.coerce.date(),
+  isFavorite: z.boolean().optional(),
   tags: z.array(z.string()),
   body: z.string(),
   metaDescription: z.string().optional(),

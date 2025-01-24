@@ -5,7 +5,7 @@ import { Marked } from "marked";
 import markedFootnote from "marked-footnote";
 import os from "os";
 import path from "path";
-import { BlueskyImageSchema, ObsidianPageSchema, ObsidianPostSchema } from "./schemas";
+import { BlueskyImageSchema, ObsidianPageSchema, ObsidianPostSchema, type ObsidianPost } from "./schemas";
 import * as matter from "gray-matter";
 import { DateTime } from "luxon";
 
@@ -80,6 +80,7 @@ const obsidianPublishedPosts = defineCollection({
   loader: async () => {
     console.log(">> Loading Obsidian Published Posts data");
     return (await loadDataPostsInFolder("Blog/Published", true))
+      .filter((post) => post.publishedAt <= new Date())
       .map((post) => {
         post.tags ||= [];
         return post;

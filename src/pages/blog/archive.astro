@@ -1,0 +1,84 @@
+---
+import { getCollection } from "astro:content";
+import Layout from "../../layouts/Layout.astro";
+import type { ObsidianPost } from "../../schemas";
+
+const allPosts = (await getCollection("obsidianPublishedPosts"))
+  .map((col) => col.data)
+  .sort((a, b) => b.publishedAt.getTime() - a.publishedAt.getTime());
+
+const postsByMonth: {
+  [key: string]: ObsidianPost[];
+} = allPosts.reduce((acc, post: ObsidianPost) => {
+  const month = post.publishedAt.toLocaleString("default", { month: "long" });
+  const year = post.publishedAt.getFullYear();
+  const monthYear = `${year} ${month}`;
+
+  if (!acc[monthYear]) {
+    acc[monthYear] = [];
+  }
+
+  acc[monthYear].push(post);
+  return acc;
+}, {});
+
+const countWords = (s) => (s.match(/\b\w+\b/g) || []).length;
+const numWordsInArchive = allPosts.reduce((acc, post) => acc + countWords(post.body), 0);
+---
+
+<Layout pageTitle={"Blog"}>
+  <h1 id="blog">Blog Archive</h1>
+  <p></p>
+  <p>
+    There are a total of <code>{allPosts.length.toLocaleString()}</code> posts in the archive. The total number of words in the archive
+    is <code>{numWordsInArchive.toLocaleString()}</code>, and the average number of words per post is <code
+      >{Math.round(numWordsInArchive / allPosts.length).toLocaleString()}</code
+    >.
+  </p>
+  <hr />
+
+  {
+    Object.entries(postsByMonth).map(([monthYear, posts]) => (
+      <section>
+        <h2>{monthYear}</h2>
+        <ul>
+          {posts.map((post) => (
+            <li>
+              <a href={`/blog/${post.slug}`}>{post.title}</a>
+              <time datetime={post.publishedAt.toISOString()}>
+                {post.publishedAt.toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                  year: "numeric",
+                })}
+              </time>
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))
+  }
+
+  <!-- <ul class="embedded blog-posts">
+    {
+      allPosts
+        .filter((st) => st.slug)
+        .map((st) => (
+          <li>
+            <span>
+              <i>
+                <time datetime={st.publishedAt.toISOString()}>
+                  {st.publishedAt.toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                  })}
+                </time>
+              </i>
+            </span>
+            <a href={`/blog/${st.slug}`}>{st.title}</a>
+          </li>
+        ))
+    }
+  </ul> -->
+</Layout>
