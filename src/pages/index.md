@@ -36,9 +36,7 @@ _Stop for a while and smell the flowers, feel the softness of the cool grass car
 _Here friend, come warm yourself by the fire. Stop for a while and feel the cool grass beneath your bare feet. Hear the bees buzzing in the air, the sound of the leaves rustling in the wind, and the crackling flames._
 -->
 
-<div>
-  <span class="tinylytics_hits"></span>
-</div>
+<hr>
 
 <div>
   <span class="tinylytics_countries"></span>

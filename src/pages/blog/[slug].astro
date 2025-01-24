@@ -29,9 +29,19 @@ const { post } = Astro.props;
     border: 0;
     background-color: inherit;
     color: inherit;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    font-size: 1.3em;
+  }
+
+  .tinylytics_kudos:hover {
+    cursor: pointer;
+  }
+
+  .tinylytics_kudos:before {
+    content: "👋";
+  }
+
+  .tinylytics_kudos.did_select:before {
+    content: "🥰";
   }
 </style>
 
