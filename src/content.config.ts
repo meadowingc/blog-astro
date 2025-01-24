@@ -48,16 +48,23 @@ async function loadDataPostsInFolder(
 
         frontMatter.publishedAt = frontMatter.publishedAt.trim().replace("−", "-");
 
-        // Try parsing with the format including four-digit timezone offset
-        let parsedDate = DateTime.fromFormat(frontMatter.publishedAt, "yyyy-MM-dd HH:mm:ss 'GMT'ZZZZ", { zone: "utc" });
+        const dateWithOffset = frontMatter.publishedAt.substring(0, frontMatter.publishedAt.lastIndexOf(" "));
+        let zoneOffset = frontMatter.publishedAt.substring(frontMatter.publishedAt.lastIndexOf(" ") + 1).replace("GMT", "UTC");
 
-        // If the first parsing attempt fails, try with the format including two-digit timezone offset
-        if (!parsedDate.isValid) {
-          parsedDate = DateTime.fromFormat(frontMatter.publishedAt, "yyyy-MM-dd HH:mm:ss 'GMT'ZZ", { zone: "utc" });
+        // Transform zoneOffset from -0600 to -6
+        const match = zoneOffset.match(/([+-])(\d{2})(\d{2})/);
+        if (match) {
+          const sign = match[1];
+          const hours = parseInt(match[2], 10);
+          zoneOffset = `UTC${sign}${hours}`;
         }
 
+        const parsedDate = DateTime.fromFormat(dateWithOffset, "yyyy-MM-dd HH:mm:ss", { zone: zoneOffset });
+
         if (!parsedDate.isValid) {
-          throw new Error(`Invalid PublishedDate format for post with title "${frontMatter.title}": ${frontMatter.publishedAt}`);
+          throw new Error(
+            `Invalid PublishedDate format for post with title "${frontMatter.title}": "${frontMatter.publishedAt}"`,
+          );
         }
 
         frontMatter.publishedAt = parsedDate.toJSDate();
