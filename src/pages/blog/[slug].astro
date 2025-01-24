@@ -22,7 +22,6 @@ interface Props {
 const { post } = Astro.props;
 ---
 
-<!--
 <style>
   .tinylytics_kudos {
     padding: 0;
@@ -34,7 +33,8 @@ const { post } = Astro.props;
     flex-direction: column;
     align-items: center;
   }
-</style> -->
+</style>
+
 <Layout pageTitle={post.title}>
   <h1>{post.title}</h1>
   <p>
