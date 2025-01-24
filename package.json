@@ -6,6 +6,7 @@
     "dev": "astro dev",
     "start": "astro dev",
     "build": "astro check && astro build",
+    "doWebmentions": "webmention dist/feed.xml --limit 10 --send",
     "preview": "astro preview",
     "astro": "astro",
     "upgrade": "npx @astrojs/upgrade"
@@ -17,6 +18,7 @@
     "@astrojs/sitemap": "^3.2.1",
     "@astropub/md": "^1.0.0",
     "@atproto/api": "^0.13.29",
+    "@remy/webmention": "^1.5.0",
     "astro": "^5.1.8",
     "gray-matter": "^4.0.3",
     "install": "file:astrojs/check@latest",
