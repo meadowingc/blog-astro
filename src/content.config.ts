@@ -48,10 +48,18 @@ async function loadDataPostsInFolder(
 
         frontMatter.publishedAt = frontMatter.publishedAt.trim().replace("−", "-");
 
-        const parsedDate = DateTime.fromFormat(frontMatter.publishedAt, "yyyy-MM-dd HH:mm:ss 'GMT'ZZ", { zone: "utc" });
+        // Try parsing with the format including four-digit timezone offset
+        let parsedDate = DateTime.fromFormat(frontMatter.publishedAt, "yyyy-MM-dd HH:mm:ss 'GMT'ZZZZ", { zone: "utc" });
+
+        // If the first parsing attempt fails, try with the format including two-digit timezone offset
+        if (!parsedDate.isValid) {
+          parsedDate = DateTime.fromFormat(frontMatter.publishedAt, "yyyy-MM-dd HH:mm:ss 'GMT'ZZ", { zone: "utc" });
+        }
+
         if (!parsedDate.isValid) {
           throw new Error(`Invalid PublishedDate format for post with title "${frontMatter.title}": ${frontMatter.publishedAt}`);
         }
+
         frontMatter.publishedAt = parsedDate.toJSDate();
       }
 
