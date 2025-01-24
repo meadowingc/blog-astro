@@ -79,8 +79,10 @@ const obsidianPublishedPosts = defineCollection({
   schema: ObsidianPostSchema,
   loader: async () => {
     console.log(">> Loading Obsidian Published Posts data");
+    const now = new Date();
+
     return (await loadDataPostsInFolder("Blog/Published", true))
-      .filter((post) => post.publishedAt <= new Date())
+      .filter((post) => post.publishedAt <= now)
       .map((post) => {
         post.tags ||= [];
         return post;
