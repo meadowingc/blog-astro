@@ -71,7 +71,7 @@ async function loadDataPostsInFolder(
         if (grayMatterParsed.content.includes(attachmentName)) {
           grayMatterParsed.content = grayMatterParsed.content.replace(
             attachmentName,
-            `/public/obsidian_images/${attachmentName}`,
+            `/obsidian_images/${attachmentName}`,
           );
           copyImageToPublicFolder(attachmentPath);
         }
