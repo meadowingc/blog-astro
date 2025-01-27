@@ -66,20 +66,15 @@ async function loadDataPostsInFolder(
       const frontMatter = grayMatterParsed.data;
 
       // check for attachments and replace with the actual file path if it exists
-      for (const attachmentPath of allKnownAttachments) {
-        const attachmentName = path.basename(attachmentPath);
-        if (grayMatterParsed.content.includes(attachmentName)) {
-          grayMatterParsed.content = grayMatterParsed.content.replace(
-            attachmentName,
-            `/obsidian_images/${attachmentName}`,
-          );
-          copyImageToPublicFolder(attachmentPath);
-        }
-      }
-
       // Convert wikilinks to markdown links
       grayMatterParsed.content = grayMatterParsed.content.replace(/!\[\[(.*?)\]\]/g, (match, p1) => {
-        return `<div class="obsidian-image"><img src="${p1}" alt="${p1}" /></div>`;
+        if (!allKnownAttachments.includes(path.join(attachmentsFolderPath, p1))) {
+          throw new Error(
+            `Wikilink is assumed to be an attachment, and attachment '${p1}' was not found in Obsidian attachments folder, for Obsidian file '${file}'`,
+          );
+        }
+
+        return `<div class="obsidian-image"><img src="/obsidian_images/${p1}" alt="${p1}" /></div>`;
       });
 
       let body = markedParser.parse(grayMatterParsed.content);
