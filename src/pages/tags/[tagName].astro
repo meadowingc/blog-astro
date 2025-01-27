@@ -8,9 +8,7 @@ export async function getStaticPaths() {
     .map((col) => col.data)
     .sort((a, b) => b.publishedAt.getTime() - a.publishedAt.getTime());
 
-  const allTags = allPosts
-    .flatMap((post) => post.tags)
-    .sort();
+  const allTags = allPosts.flatMap((post) => post.tags).sort();
 
   const tags = Array.from(new Set(allTags));
 
@@ -32,34 +30,28 @@ const { posts, tag } = Astro.props;
 ---
 
 <Layout pageTitle={`Tag: ${tag}`}>
-  <h1 id="tag">Posts tagged #{tag}</h1>
-
-  <p></p>
+  <h1 id="tag">Posts tagged #{tag} (<a href={`/feeds/tag_feed_${tag}.xml`}>RSS</a>)</h1>
   <p>
-    <a href="/tags"> Back to all tags </a>
+    Browse all tags: <a href="/tags">Tags</a>
   </p>
-  <p></p>
-
   <ul class="embedded blog-posts">
     {
-      posts
-        .filter((st) => st.slug)
-        .map((st) => (
-          <li>
-            <span>
-              <i>
-                <time datetime={st.publishedAt.toISOString()}>
-                  {st.publishedAt.toLocaleDateString("en-US", {
-                    year: "numeric",
-                    month: "short",
-                    day: "numeric",
-                  })}
-                </time>
-              </i>
-            </span>
-            <a href={`/blog/${st.slug}`}>{st.title}</a>
-          </li>
-        ))
+      posts.map((post) => (
+        <li>
+          <span>
+            <i>
+              <time datetime={post.publishedAt.toISOString()}>
+                {post.publishedAt.toLocaleDateString("en-US", {
+                  year: "numeric",
+                  month: "short",
+                  day: "numeric",
+                })}
+              </time>
+            </i>
+          </span>
+          <a href={`/blog/${post.slug}`}>{post.title}</a>
+        </li>
+      ))
     }
   </ul>
 </Layout>
