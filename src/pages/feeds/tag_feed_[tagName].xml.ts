@@ -1,6 +1,7 @@
 // FILE: src/pages/feeds/[tag].xml.ts
 import rss from "@astrojs/rss";
 import { getCollection } from "astro:content";
+import type { ObsidianPost } from "../../schemas";
 
 export const getStaticPaths = async () => {
   const allPosts = (await getCollection("obsidianPublishedPosts"))
@@ -20,7 +21,7 @@ export const getStaticPaths = async () => {
   });
 };
 
-export async function GET({ params, site , props }) {
+export async function GET({ params, site, props }) {
   const tag = params.tagName;
   const posts = props.posts;
 
@@ -29,7 +30,7 @@ export async function GET({ params, site , props }) {
     description: `Posts tagged with ${tag} on Meadow`,
     site: site,
     stylesheet: "/rss/pretty-feed-v3.xsl",
-    items: posts.map((post) => ({
+    items: posts.map((post: ObsidianPost) => ({
       title: post.title,
       link: `/blog/${post.slug}/`,
       pubDate: post.publishedAt,

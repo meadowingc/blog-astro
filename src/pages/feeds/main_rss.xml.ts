@@ -1,7 +1,7 @@
 import rss from "@astrojs/rss";
 import { getCollection } from "astro:content";
 
-export async function GET(context) {
+export async function GET({ site }) {
   const posts = (await getCollection("obsidianPublishedPosts"))
     .map((col) => col.data)
     .sort((a, b) => b.publishedAt.getTime() - a.publishedAt.getTime());
@@ -9,7 +9,7 @@ export async function GET(context) {
   return rss({
     title: "Meadow",
     description: "Wondering about life, the meaning of the universe, and everything.",
-    site: context.site,
+    site: site,
     stylesheet: "/rss/pretty-feed-v3.xsl",
     items: posts.map((post) => ({
       title: `${post.title}`,

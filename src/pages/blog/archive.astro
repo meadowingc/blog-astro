@@ -22,7 +22,7 @@ const postsByMonth: {
   return acc;
 }, {});
 
-const countWords = (s) => (s.match(/\b\w+\b/g) || []).length;
+const countWords = (s: string) => (s.match(/\b\w+\b/g) || []).length;
 const numWordsInArchive = allPosts.reduce((acc, post) => acc + countWords(post.body), 0);
 ---
 

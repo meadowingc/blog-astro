@@ -1,13 +1,13 @@
 import { AtpAgent } from "@atproto/api";
-import { defineCollection, z } from "astro:content";
+import { defineCollection } from "astro:content";
 import fs from "fs";
+import * as matter from "gray-matter";
+import { DateTime } from "luxon";
 import { Marked } from "marked";
 import markedFootnote from "marked-footnote";
 import os from "os";
 import path from "path";
-import { BlueskyImageSchema, ObsidianPageSchema, ObsidianPostSchema, type ObsidianPost } from "./schemas";
-import * as matter from "gray-matter";
-import { DateTime } from "luxon";
+import { BlueskyImageSchema, ObsidianPageSchema, ObsidianPostSchema } from "./schemas";
 
 const CACHE_DURATION = 5 * 60 * 60 * 1000; // hours in milliseconds
 const BLUESKY_IMAGES_CACHE_FILE_PATH = path.join(os.tmpdir(), "AstroBlog__BlueskyImagesCache.json");
