@@ -182,9 +182,18 @@ const blueskyImages = defineCollection({
               };
             });
 
+        const hashtagsInPost =
+          record.facets?.flatMap((facet) => {
+            if (facet.features) {
+              return facet.features
+                .filter((feature) => feature.$type === "app.bsky.richtext.facet#tag")
+                .map((feature) => feature.tag);
+            }
+            return [];
+          }) ?? [];
+
         // we ignore videos for now
         // const embedVideos: undefined | any[] = record.embed.video;
-
         return {
           id: postId,
           text: record.text,
@@ -192,12 +201,13 @@ const blueskyImages = defineCollection({
           postUrl,
           images,
           isReplyToAnotherPost,
+          hashtagsInPost,
         };
       })
       .filter((post) => {
         const badPostIds = ["3lbrty5hplk2j", "3lc644skrfs2g"];
 
-        return !!post.images && !badPostIds.includes(post.id);
+        return !!post.images && !badPostIds.includes(post.id) && !post.hashtagsInPost.includes("meme");
       })
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
