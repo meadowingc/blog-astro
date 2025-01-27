@@ -1,4 +1,5 @@
 src/content/bear_export
+public/obsidian_images/
 
 # build output
 dist/

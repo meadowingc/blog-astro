@@ -56,13 +56,12 @@ async function loadDataPostsInFolder(
       // check for attachments and replace with the actual file path if it exists
       for (const attachmentPath of allKnownAttachments) {
         const attachmentName = path.basename(attachmentPath);
-
         grayMatterParsed.content = grayMatterParsed.content.replace(attachmentName, attachmentPath);
       }
 
       // Convert wikilinks to markdown links
       grayMatterParsed.content = grayMatterParsed.content.replace(/!\[\[(.*?)\]\]/g, (match, p1) => {
-        return `![${p1}](./${p1})`;
+        return `<img src="${p1}" alt="${p1}" />`;
       });
 
       let body = markedParser.parse(grayMatterParsed.content);
