@@ -4,12 +4,12 @@ on:
   # Trigger the workflow every time you push to the `main` branch
   # Using a different branch name? Replace `main` with your branch’s name
   push:
-    branches: [ main ]
+    branches: [main]
   # Allows you to run this workflow manually from the Actions tab on GitHub.
   workflow_dispatch:
   # Schedule the workflow to run every 8 hours
   schedule:
-    - cron: '0 */8 * * *'
+    - cron: "0 */8 * * *"
 
 # Allow this job to clone the repo and create a page deployment
 permissions:
@@ -18,8 +18,11 @@ permissions:
   id-token: write
 
 jobs:
-  build:
+  build-deplog:
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Checkout your repository using git
         uses: actions/checkout@v4
@@ -27,7 +30,7 @@ jobs:
           path: blog-astro
 
       - name: Checkout Obsidian Brain to source posts
-        uses: actions/checkout@v4  
+        uses: actions/checkout@v4
         with:
           repository: meadowingc/obsidian-brain
           path: obsidian-brain
@@ -59,19 +62,12 @@ jobs:
           # node-version: 20 # The specific version of Node that should be used to build your site. Defaults to 20. (optional)
           # package-manager: pnpm@latest # The Node package manager that should be used to install dependencies and build your site. Automatically detected based on your lockfile. (optional)
 
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
       - name: Fire webmentions
         run: |
           cd blog-astro
           npm run doWebmentions
           cd ..
-        
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
