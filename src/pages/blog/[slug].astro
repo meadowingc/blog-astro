@@ -51,6 +51,14 @@ const { post } = Astro.props;
   }
 </style>
 
+<style is:inline>
+  .obsidian-image img {
+    max-width: 100%;
+    margin: 0 auto;
+    display: block;
+  }
+</style>
+
 <Layout pageTitle={post.title}>
   <h1>{post.title}</h1>
   <p>

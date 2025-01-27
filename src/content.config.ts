@@ -15,6 +15,7 @@ const BLUESKY_IMAGES_CACHE_FILE_PATH = path.join(os.tmpdir(), "AstroBlog__Bluesk
 // Load all attachments from Obsidian folder _attachments
 const baseObsidianPath = path.resolve("../obsidian-brain/Brian/");
 const attachmentsFolderPath = path.join(baseObsidianPath, "_attachments");
+const publicImagesFolderPath = path.resolve("./public/obsidian_images");
 
 // now put every filename in the allKnownAttachments array if the file is not a directory (or recurse)
 const allKnownAttachments: string[] = [];
@@ -34,6 +35,17 @@ function loadAttachments(folderPath: string) {
 }
 
 loadAttachments(attachmentsFolderPath);
+
+function copyImageToPublicFolder(imagePath: string) {
+  const imageName = path.basename(imagePath);
+  const destinationPath = path.join(publicImagesFolderPath, imageName);
+
+  if (!fs.existsSync(publicImagesFolderPath)) {
+    fs.mkdirSync(publicImagesFolderPath, { recursive: true });
+  }
+
+  fs.copyFileSync(imagePath, destinationPath);
+}
 
 async function loadDataPostsInFolder(
   folderPath: string,
@@ -56,12 +68,18 @@ async function loadDataPostsInFolder(
       // check for attachments and replace with the actual file path if it exists
       for (const attachmentPath of allKnownAttachments) {
         const attachmentName = path.basename(attachmentPath);
-        grayMatterParsed.content = grayMatterParsed.content.replace(attachmentName, attachmentPath);
+        if (grayMatterParsed.content.includes(attachmentName)) {
+          grayMatterParsed.content = grayMatterParsed.content.replace(
+            attachmentName,
+            `/public/obsidian_images/${attachmentName}`,
+          );
+          copyImageToPublicFolder(attachmentPath);
+        }
       }
 
       // Convert wikilinks to markdown links
       grayMatterParsed.content = grayMatterParsed.content.replace(/!\[\[(.*?)\]\]/g, (match, p1) => {
-        return `<img src="${p1}" alt="${p1}" />`;
+        return `<div class="obsidian-image"><img src="${p1}" alt="${p1}" /></div>`;
       });
 
       let body = markedParser.parse(grayMatterParsed.content);
