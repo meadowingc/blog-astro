@@ -12,11 +12,33 @@ import { DateTime } from "luxon";
 const CACHE_DURATION = 5 * 60 * 60 * 1000; // hours in milliseconds
 const BLUESKY_IMAGES_CACHE_FILE_PATH = path.join(os.tmpdir(), "AstroBlog__BlueskyImagesCache.json");
 
+// Load all attachments from Obsidian folder _attachments
+const baseObsidianPath = path.resolve("../obsidian-brain/Brian/");
+const attachmentsFolderPath = path.join(baseObsidianPath, "_attachments");
+
+// now put every filename in the allKnownAttachments array if the file is not a directory (or recurse)
+const allKnownAttachments: string[] = [];
+function loadAttachments(folderPath: string) {
+  const files = fs.readdirSync(folderPath);
+
+  files.forEach((file) => {
+    const filePath = path.join(folderPath, file);
+    const stats = fs.statSync(filePath);
+
+    if (stats.isDirectory()) {
+      loadAttachments(filePath);
+    } else {
+      allKnownAttachments.push(filePath);
+    }
+  });
+}
+
+loadAttachments(attachmentsFolderPath);
+
 async function loadDataPostsInFolder(
   folderPath: string,
   needsPublishedDate: boolean,
 ): Promise<{ id: string; body: string; [key: string]: any }[]> {
-  const baseObsidianPath = path.resolve("../obsidian-brain/Brian/");
   const actualFolderPath = path.resolve(path.join(baseObsidianPath, folderPath));
   const markdownFiles = fs.readdirSync(actualFolderPath).filter((file) => file.endsWith(".md"));
 
@@ -30,6 +52,18 @@ async function loadDataPostsInFolder(
 
       const grayMatterParsed = matter.default(postContent);
       const frontMatter = grayMatterParsed.data;
+
+      // check for attachments and replace with the actual file path if it exists
+      for (const attachmentPath of allKnownAttachments) {
+        const attachmentName = path.basename(attachmentPath);
+
+        grayMatterParsed.content = grayMatterParsed.content.replace(attachmentName, attachmentPath);
+      }
+
+      // Convert wikilinks to markdown links
+      grayMatterParsed.content = grayMatterParsed.content.replace(/!\[\[(.*?)\]\]/g, (match, p1) => {
+        return `![${p1}](./${p1})`;
+      });
 
       let body = markedParser.parse(grayMatterParsed.content);
 
