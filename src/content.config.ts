@@ -74,6 +74,9 @@ async function loadDataPostsInFolder(
           );
         }
 
+        // copy the image to the public folder
+        copyImageToPublicFolder(path.join(attachmentsFolderPath, p1));
+
         return `<div class="obsidian-image"><img src="/obsidian_images/${p1}" alt="${p1}" /></div>`;
       });
 
