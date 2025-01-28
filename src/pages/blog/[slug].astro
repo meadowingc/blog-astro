@@ -77,23 +77,7 @@ const { post } = Astro.props;
 
   <article set:html={post.body} />
 
-  <button class="tinylytics_kudos" data-private="true">
-    <!-- <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      width="24"
-      height="24"
-      stroke="currentColor"
-      stroke-width="2"
-      fill="none"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-      class="css-i6dzq1"
-    >
-      <polyline points="17 11 12 6 7 11"></polyline>
-      <polyline points="17 18 12 13 7 18"></polyline>
-    </svg> -->
-  </button>
+  <!-- <button class="tinylytics_kudos" data-private="true"> </button> -->
 
   <p>
     {post.tags.map((tag: string) => /* prettier-ignore */ <a class="tag-link" href={`/tags/${tag}`}>#{tag}</a>)}
