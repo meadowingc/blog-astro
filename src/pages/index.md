@@ -43,3 +43,9 @@ _Here friend, come warm yourself by the fire. Stop for a while and feel the cool
 </div>
 
 <link href="https://github.com/meadowingc" rel="me">
+
+<div class="h-card" style="display:none;">
+  <span class="p-name">Meadow</span>
+  <a class="u-url" href="https://meadow.cafe/">w</a>,
+  <a class="u-email" href="mailto:meadowingc@proton.me">e</a>
+</div>
