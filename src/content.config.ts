@@ -149,7 +149,7 @@ const obsidianPublishedPosts = defineCollection({
       .filter((post) => post.publishedAt <= now)
       .map((post) => {
         post.tags ||= [];
-        post.metaImage ||= `/open-graph/blog--${post.slug}.png`;
+        post.metaImage ||= `https://meadow.cafe/open-graph/blog--${post.slug}.png`;
         return post;
       })
       .sort((a, b) => b.publishedAt.getTime() - a.publishedAt.getTime());
