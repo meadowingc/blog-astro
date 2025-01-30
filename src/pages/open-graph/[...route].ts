@@ -3,11 +3,9 @@ import { OGImageRoute } from "astro-og-canvas";
 
 const obsidianPosts = await getCollection("obsidianPublishedPosts");
 
-// Map the array of content collection entries to create an object.
-// Converts [{ id: 'post.md', data: { title: 'Example', description: '' } }]
-// to { 'post.md': { title: 'Example', description: '' } }
 const pages = obsidianPosts
   .map((pdata) => pdata.data)
+  .filter((post) => !post.metaImage) // no need to generate OG images for posts that already have one
   .reduce((acc, post) => {
     acc[`blog--${post.slug}`] = {
       title: post.title,
