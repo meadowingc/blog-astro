@@ -55,7 +55,8 @@ const { post } = Astro.props;
   pageTitle={post.title}
   openGraph={{
     title: post.title,
-    image: post.metaDescription,
+    image: post.metaImage,
+    description: post.metaDescription,
     url: `https://meadow.cafe/blog/${post.slug}`,
     type: "article",
     articleTags: post.tags,
