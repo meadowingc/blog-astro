@@ -5,7 +5,7 @@ const obsidianPosts = await getCollection("obsidianPublishedPosts");
 
 const pages = obsidianPosts
   .map((pdata) => pdata.data)
-  .filter((post) => !post.metaImage?.includes("/open-graph/blog")) // no need to generate OG images for posts that already have one
+  .filter((post) => !post.metaImage || !post.metaImage?.includes("/open-graph/blog")) // no need to generate OG images for posts that already have one
   .reduce((acc, post) => {
     acc[`blog--${post.slug}`] = {
       title: post.title,
