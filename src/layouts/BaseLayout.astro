@@ -1,5 +1,12 @@
 ---
-const { pageTitle } = Astro.props;
+import type { OpenGraphProps } from "../types";
+
+interface Props {
+  pageTitle: string;
+  openGraph?: OpenGraphProps;
+}
+
+const { pageTitle, openGraph } = Astro.props as Props;
 ---
 
 <!doctype html>
@@ -27,6 +34,26 @@ const { pageTitle } = Astro.props;
     <script is:inline src="https://tinylytics.app/embed/vuxge7ZWyc3xfzhxp7_y.js?countries" defer></script>
     <script is:inline src="https://mochi.meadow.cafe/reaper/embed/1.js" async></script>
     <title>{pageTitle} | Meadow</title>
+
+    <meta property="og:locale" content="en_US" />
+    {
+      openGraph && (
+        <>
+          {openGraph.title && <meta property="og:title" content={openGraph.title} />}
+          {openGraph.type && <meta property="og:type" content={openGraph.type} />}
+          {openGraph.url && <meta property="og:url" content={openGraph.url} />}
+          {openGraph.image && <meta property="og:image" content={openGraph.image} />}
+          {openGraph.description && <meta property="og:description" content={openGraph.description} />}
+          {openGraph.articlePublishedTime && (
+            <meta property="article:published_time" content={openGraph.articlePublishedTime.toISOString()} />
+          )}
+          {openGraph.articleAuthor && <meta property="article:author" content={openGraph.articleAuthor} />}
+          {openGraph.articleTags &&
+            openGraph.articleTags.length > 0 &&
+            openGraph.articleTags.map((tag) => <meta property="article:tag" content={tag} />)}
+        </>
+      )
+    }
   </head>
   <body>
     <slot />
@@ -132,7 +159,7 @@ const { pageTitle } = Astro.props;
 
   em,
   i {
-    color: var(--em-color);
+    color: var (--em-color);
   }
 
   table {

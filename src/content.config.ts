@@ -145,13 +145,25 @@ const obsidianPublishedPosts = defineCollection({
     console.log(">> Loading Obsidian Published Posts data");
     const now = new Date();
 
-    return (await loadDataPostsInFolder("Blog/Published", true))
+    const posts = (await loadDataPostsInFolder("Blog/Published", true))
       .filter((post) => post.publishedAt <= now)
       .map((post) => {
         post.tags ||= [];
+        post.metaImage ||= `/open-graph/blog--${post.slug}.png`;
         return post;
       })
       .sort((a, b) => b.publishedAt.getTime() - a.publishedAt.getTime());
+
+    // check that all slugs are unique
+    const slugSet = new Set();
+    posts.forEach((post) => {
+      if (slugSet.has(post.slug)) {
+        throw new Error(`Duplicate slug found: ${post.slug}`);
+      }
+      slugSet.add(post.slug);
+    });
+
+    return posts;
   },
 });
 

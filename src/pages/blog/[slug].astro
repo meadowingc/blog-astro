@@ -51,15 +51,26 @@ const { post } = Astro.props;
   }
 </style>
 
-<style is:inline>
-  .obsidian-image img {
-    max-width: 100%;
-    margin: 0 auto;
-    display: block;
-  }
-</style>
+<Layout
+  pageTitle={post.title}
+  openGraph={{
+    title: post.title,
+    image: post.metaDescription,
+    url: `https://meadow.cafe/blog/${post.slug}`,
+    type: "article",
+    articleTags: post.tags,
+    articlePublishedTime: post.publishedAt,
+    articleAuthor: "Meadow",
+  }}
+>
+  <style is:inline>
+    .obsidian-image img {
+      max-width: 100%;
+      margin: 0 auto;
+      display: block;
+    }
+  </style>
 
-<Layout pageTitle={post.title}>
   <h1>{post.title}</h1>
   <p>
     <i>
