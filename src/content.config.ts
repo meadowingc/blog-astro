@@ -224,7 +224,7 @@ const blueskyImages = defineCollection({
       .map((post) => {
         const uriParts = post.uri.split("/");
         const postId = uriParts[uriParts.length - 1];
-        const postUrl = `https://bsky.app/profile/meadow.cafe/post/${postId}`;
+        const postUrl = `https://bsky.app/profile/${post.author.did}/post/${postId}`;
 
         const record: any = post.record;
         const isReplyToAnotherPost = post.record.reply?.parent !== undefined;
