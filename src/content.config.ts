@@ -2,10 +2,12 @@ import { AtpAgent } from "@atproto/api";
 import { defineCollection } from "astro:content";
 import fs from "fs";
 import * as matter from "gray-matter";
+import { JSDOM } from "jsdom";
 import { DateTime } from "luxon";
 import { Marked } from "marked";
 import markedFootnote from "marked-footnote";
 import os from "os";
+
 import path from "path";
 import { BlueskyImageSchema, ObsidianPageSchema, ObsidianPostSchema } from "./schemas";
 
@@ -171,7 +173,38 @@ const obsidianPublishedPages = defineCollection({
   schema: ObsidianPageSchema,
   loader: async () => {
     console.log(">> Loading Obsidian Published Pages data");
-    return await loadDataPostsInFolder("Blog/Pages", false);
+    const pagesInFolder = await loadDataPostsInFolder("Blog/Pages", false);
+
+    // -------- special handle of links pages to create gumbo
+    const gumboPage = pagesInFolder.find((page) => page.id === "Links.md");
+
+    if (!gumboPage) {
+      throw new Error("Could not find Links.md file");
+    }
+
+    let parts = gumboPage.body.split("<!-- GUMBO START -->");
+    const beforeGumbo = parts[0];
+    parts = parts[1].split("<!-- GUMBO END -->");
+    const gumboDoc = new JSDOM(parts[0]).window.document;
+    const afterGumbo = parts[1];
+
+    const gumboLinks = Array.from(gumboDoc.querySelectorAll("a"))
+      .filter((link: any) => link.href.startsWith("http"))
+      .map((link: any) => {
+        return `<a href="${link.href}" title="${link.innerHTML}">*</a>`;
+      });
+
+    // shuffle
+    for (let i = gumboLinks.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [gumboLinks[i], gumboLinks[j]] = [gumboLinks[j], gumboLinks[i]];
+    }
+
+    const gumboAnchorStrings = gumboLinks.join(" ");
+
+    gumboPage.body = beforeGumbo + gumboAnchorStrings + afterGumbo;
+
+    return pagesInFolder;
   },
 });
 
