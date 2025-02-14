@@ -28,11 +28,13 @@ const { pageTitle, openGraph } = Astro.props as Props;
       title="Meadow — Main Feed"
       href={new URL("feeds/main_rss.xml", Astro.site)}
     />
-    <link rel="webmention" href="https://webmention.io/meadow.cafe/webmention" />
+    <link rel="webmention" href="https://mochi.meadow.cafe/webmention/meadow/1/create" />
     <link rel="pingback" href="https://webmention.io/meadow.cafe/xmlrpc" />
+
     <!-- <script is:inline src="https://tinylytics.app/embed/vuxge7ZWyc3xfzhxp7_y.js?kudos=custom&countries" defer></script> -->
     <script is:inline src="https://tinylytics.app/embed/vuxge7ZWyc3xfzhxp7_y.js?countries" defer></script>
     <script is:inline src="https://mochi.meadow.cafe/reaper/meadow/embed/1.js" async></script>
+
     <title>{pageTitle} | Meadow</title>
 
     <meta property="og:locale" content="en_US" />
