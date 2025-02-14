@@ -89,13 +89,15 @@ const { post } = Astro.props;
     </p>
 
     <div class="e-content p-name" set:html={post.body} />
-    <link class="u-url" href={`https://meadow.cafe/blog/${post.slug}`} />
 
     <!-- <button class="tinylytics_kudos" data-private="true"> </button> -->
 
     <p>
-      {post.tags.map((tag: string) => /* prettier-ignore */ <a class="tag-link" href={`/tags/${tag}`}>#{tag}</a>)}
+      {post.tags.map((tag: string) => /* prettier-ignore */ <a class="tag-link p-category" href={`/tags/${tag}`}>#{tag}</a>)}
     </p>
+
+    <a hidden rel="author" class="p-author h-card" href="https://meadow.cafe">Meadow</a>
+    <link class="u-url" href={`https://meadow.cafe/blog/${post.slug}`} />
   </article>
 </Layout>
 
