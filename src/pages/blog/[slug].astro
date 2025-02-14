@@ -72,28 +72,31 @@ const { post } = Astro.props;
     }
   </style>
 
-  <h1>{post.title}</h1>
-  <p>
-    <i>
-      <time datetime={post.publishedAt.toISOString()}>
-        {
-          post.publishedAt.toLocaleDateString("en-US", {
-            month: "short",
-            day: "numeric",
-            year: "numeric",
-          })
-        }
-      </time>
-    </i>
-  </p>
+  <article class="h-entry">
+    <h1 class="p-name">{post.title}</h1>
+    <p>
+      <i>
+        <time class="dt-published" datetime={post.publishedAt.toISOString()}>
+          {
+            post.publishedAt.toLocaleDateString("en-US", {
+              month: "short",
+              day: "numeric",
+              year: "numeric",
+            })
+          }
+        </time>
+      </i>
+    </p>
 
-  <article set:html={post.body} />
+    <div class="e-content p-name" set:html={post.body} />
+    <link class="u-url" href={`https://meadow.cafe/blog/${post.slug}`} />
 
-  <!-- <button class="tinylytics_kudos" data-private="true"> </button> -->
+    <!-- <button class="tinylytics_kudos" data-private="true"> </button> -->
 
-  <p>
-    {post.tags.map((tag: string) => /* prettier-ignore */ <a class="tag-link" href={`/tags/${tag}`}>#{tag}</a>)}
-  </p>
+    <p>
+      {post.tags.map((tag: string) => /* prettier-ignore */ <a class="tag-link" href={`/tags/${tag}`}>#{tag}</a>)}
+    </p>
+  </article>
 </Layout>
 
 <style>

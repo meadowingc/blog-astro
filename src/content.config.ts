@@ -122,8 +122,9 @@ async function loadDataPostsInFolder(
       }
 
       if (!frontMatter.slug) {
-        function convertToSlug(Text) {
-          return Text.toLowerCase()
+        function convertToSlug(text) {
+          return text
+            .toLowerCase()
             .replace(/[^\w ]+/g, "")
             .replace(/ +/g, "-");
         }
