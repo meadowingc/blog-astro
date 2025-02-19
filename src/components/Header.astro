@@ -1,15 +1,23 @@
 ---
-import Navigation from "../components/Navigation.astro";
-
 const { title } = Astro.props;
 ---
 
-
 <header>
   <a class="title" href="/">
-      <h1>
-          {title || "Meadow"}
-      </h1>
+    <h1>
+      {title || "Meadow"}
+    </h1>
   </a>
-  <Navigation />
+  <nav>
+    <p>
+      <a href="/">Home</a>
+      <a href="/blog/">Blog</a>
+      <a href="/now/">Now</a>
+      <a href="/links/">Links</a>
+      <a href="/mailbox/">Mailbox</a>
+      <a href="/guestbook/">Guestbook</a>
+      <a href="/tools">Tools</a>‖ <a href="/feeds/">RSS</a>
+      <a href="/photos">📷</a>
+    </p>
+  </nav>
 </header>
