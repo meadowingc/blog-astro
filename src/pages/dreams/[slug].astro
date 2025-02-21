@@ -1,0 +1,71 @@
+---
+import { getCollection } from "astro:content";
+import Layout from "../../layouts/Layout.astro";
+import type { ObsidianDream } from "../../schemas";
+
+export async function getStaticPaths() {
+  return (await getCollection("obsidianPublishedDreams"))
+    .map((col) => col.data)
+    .map((dream) => {
+      return {
+        params: { slug: `${dream.slug}` },
+        props: { dream },
+      };
+    });
+}
+
+interface Props {
+  dream: ObsidianDream;
+}
+
+const { dream } = Astro.props;
+---
+
+<Layout
+  pageTitle={dream.title}
+  openGraph={{
+    title: dream.title,
+    image: dream.metaImage,
+    description: dream.metaDescription,
+    url: `https://meadow.cafe/dreams/${dream.slug}`,
+    type: "article",
+    articlePublishedTime: dream.publishedAt,
+    articleAuthor: "Meadow",
+  }}
+>
+  <style is:inline>
+    .obsidian-image img {
+      max-width: 100%;
+      margin: 0 auto;
+      display: block;
+    }
+  </style>
+
+  <article class="h-entry">
+    <h1 class="p-name">{dream.title}</h1>
+    <p>
+      <i>
+        <time class="dt-published" datetime={dream.publishedAt.toISOString()}>
+          {
+            dream.publishedAt.toLocaleDateString("en-US", {
+              month: "short",
+              day: "numeric",
+              year: "numeric",
+            })
+          }
+        </time>
+      </i>
+    </p>
+
+    <div class="e-content p-name" set:html={dream.body} />
+
+    <a hidden rel="author" class="p-author h-card" href="https://meadow.cafe">Meadow</a>
+    <link class="u-url" href={`https://meadow.cafe/dreams/${dream.slug}`} />
+  </article>
+</Layout>
+
+<style>
+  .tag-link {
+    margin-right: 0.5rem;
+  }
+</style>

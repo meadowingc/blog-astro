@@ -1,0 +1,55 @@
+---
+import { getCollection } from "astro:content";
+import Layout from "../../layouts/Layout.astro";
+
+const allDreams = (await getCollection("obsidianPublishedDreams"))
+  .map((col) => col.data)
+  .sort((a, b) => b.publishedAt.getTime() - a.publishedAt.getTime());
+---
+
+<style>
+  .tag-link {
+    margin-right: 0.4rem;
+  }
+</style>
+
+<Layout pageTitle={"Dreams"}>
+  <h1 id="dreams">Dreams</h1>
+  <p>
+    I have been keeping a dream journal for a while now, and I thought it would be fun to share some of the most interesting
+    dreams here! Note that these have received very little to no editing, except for the fact that I've anonimized every sensitive
+    name and location. Enter at your own risk!
+  </p>
+
+  <p>
+    For some of them I provide a brief analysis or commentaries of the things that struck me. My views on dreams align very much
+    with that of Jungian phylosophy, but I of course know very little about symbolism. If you have any comments then know they're
+    appreciated!
+  </p>
+
+  <hr />
+
+  <section>
+    <ul class="embedded blog-posts">
+      {
+        allDreams.map((dream) => (
+          <li>
+            <span>
+              <i>
+                <time datetime={dream.publishedAt.toISOString()}>
+                  {dream.publishedAt.toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                  })}
+                </time>
+              </i>
+            </span>
+
+            <a href={`/dreams/${dream.slug}`}>{dream.title}</a>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+</Layout>

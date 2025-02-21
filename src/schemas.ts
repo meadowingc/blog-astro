@@ -3,6 +3,7 @@ import { z } from "astro:content";
 export type BlueskyImage = z.infer<typeof BlueskyImageSchema>;
 export type ObsidianPost = z.infer<typeof ObsidianPostSchema>;
 export type ObsidianPage = z.infer<typeof ObsidianPageSchema>;
+export type ObsidianDream = z.infer<typeof ObsidianDreamSchema>;
 
 export const BlueskyImageSchema = z.object({
   id: z.string(),
@@ -41,6 +42,17 @@ export const ObsidianPageSchema = z.object({
   title: z.string(),
   slug: z.string(),
   filename: z.string(),
+  body: z.string(),
+  metaDescription: z.string().optional(),
+  metaImage: z.string().optional(),
+});
+
+export const ObsidianDreamSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  slug: z.string(),
+  filename: z.string(),
+  publishedAt: z.coerce.date(),
   body: z.string(),
   metaDescription: z.string().optional(),
   metaImage: z.string().optional(),

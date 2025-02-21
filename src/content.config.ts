@@ -9,7 +9,7 @@ import markedFootnote from "marked-footnote";
 import os from "os";
 
 import path from "path";
-import { BlueskyImageSchema, ObsidianPageSchema, ObsidianPostSchema } from "./schemas";
+import { BlueskyImageSchema, ObsidianDreamSchema, ObsidianPageSchema, ObsidianPostSchema } from "./schemas";
 
 const CACHE_DURATION = 5 * 60 * 60 * 1000; // hours in milliseconds
 const BLUESKY_IMAGES_CACHE_FILE_PATH = path.join(os.tmpdir(), "AstroBlog__BlueskyImagesCache.json");
@@ -209,6 +209,18 @@ const obsidianPublishedPages = defineCollection({
   },
 });
 
+const obsidianPublishedDreams = defineCollection({
+  schema: ObsidianDreamSchema,
+  loader: async () => {
+    console.log(">> Loading Obsidian Published Dreams data");
+    const dreamsInFolder = (await loadDataPostsInFolder("Blog/Dreams", false))
+      // only include dreams that have a publishedAt date
+      .filter((dream) => dream.publishedAt);
+
+    return dreamsInFolder;
+  },
+});
+
 const blueskyImages = defineCollection({
   schema: BlueskyImageSchema,
   loader: async () => {
@@ -320,4 +332,5 @@ export const collections = {
   blueskyImages,
   obsidianPublishedPosts,
   obsidianPublishedPages,
+  obsidianPublishedDreams,
 };

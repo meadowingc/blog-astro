@@ -1,26 +1,22 @@
 import rss from "@astrojs/rss";
 import { getCollection } from "astro:content";
 
-// this is a fallback feed for those people that were originally following me on
-// Bearblog. It contains only posts.
-
 export async function GET({ site }) {
-  const bearPosts = (await getCollection("obsidianPublishedPosts"))
+  const dreams = (await getCollection("obsidianPublishedDreams"))
     .map((col) => col.data)
     .sort((a, b) => b.publishedAt.getTime() - a.publishedAt.getTime());
 
   return rss({
-    title: "Meadow",
+    title: "Meadow - Dreams",
     description: "Wondering about life, the meaning of the universe, and everything.",
     site: site,
     stylesheet: "/rss/pretty-feed-v3.xsl",
-    items: bearPosts.map((post) => ({
+    items: dreams.map((post) => ({
       title: `${post.title}`,
-      link: `/blog/${post.slug}/`,
+      link: `/dreams/${post.slug}/`,
       pubDate: post.publishedAt,
       description: post.body,
     })),
-    // (optional) inject custom xml
     customData: `<language>en-us</language>`,
   });
 }
