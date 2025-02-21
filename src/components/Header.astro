@@ -3,11 +3,14 @@ const { title } = Astro.props;
 ---
 
 <header>
-  <a class="title" href="/">
-    <h1>
-      {title || "Meadow"}
-    </h1>
-  </a>
+  <div class="header-container">
+    <a class="title" href="/">
+      <h1>
+        {title || "Meadow"}
+      </h1>
+    </a>
+    <div class="flag" role="img" aria-label="Progress Pride Flag"></div>
+  </div>
   <nav>
     <p>
       <a href="/">Home</a>
@@ -22,3 +25,34 @@ const { title } = Astro.props;
     </p>
   </nav>
 </header>
+
+<style>
+  header {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .header-container {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    align-items: center;
+  }
+
+  .title {
+    flex: 1;
+  }
+
+  .flag {
+    width: 36px;
+    height: 23px;
+    background: conic-gradient(at 14% 50%, #0000 221.25deg, white 222deg 318deg, #0000 318.25deg),
+      conic-gradient(at 23% 50%, #0000 221.25deg, #ffa6b9 222deg 318deg, #0000 318.25deg),
+      conic-gradient(at 32% 50%, #0000 221.25deg, #00d2ff 222deg 318deg, #0000 318.25deg),
+      conic-gradient(at 41% 50%, #0000 221.25deg, #753000 222deg 318deg, #0000 318.25deg),
+      conic-gradient(at 50% 50%, #0000 221.25deg, black 222deg 318deg, #0000 318.25deg),
+      linear-gradient(red 0 16.66%, orange 0 33.33%, yellow 0 50%, green 0 66.66%, blue 0 83.33%, indigo 0);
+    border-radius: 2px;
+    box-shadow: -1px -1px 3px #ffc0cb49;
+  }
+</style>
