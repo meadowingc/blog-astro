@@ -23,7 +23,7 @@ const remainingPhotos = minimalPhotoData.slice(20); // Remaining photos
         photo.images.map((image) => (
           <div class="masonry-item">
             <a href={photo.postUrl} target="_blank">
-              <img src={image.thumb} alt={image.alt} />
+              <img loading="lazy" src={image.thumb} alt={image.alt} />
             </a>
           </div>
         )),
@@ -44,7 +44,7 @@ const remainingPhotos = minimalPhotoData.slice(20); // Remaining photos
       photo.images.forEach((image) => {
         const div = document.createElement("div");
         div.className = "masonry-item";
-        div.innerHTML = `<a href="${photo.postUrl}" target="_blank"><img src="${image.thumb}" alt="${image.alt}" /></a>`;
+        div.innerHTML = `<a href="${photo.postUrl}" target="_blank"><img loading="lazy" src="${image.thumb}" alt="${image.alt}" /></a>`;
         masonry?.appendChild(div);
       });
     });

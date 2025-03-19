@@ -79,7 +79,7 @@ async function loadDataPostsInFolder(
         // copy the image to the public folder
         copyImageToPublicFolder(path.join(attachmentsFolderPath, p1));
 
-        return `<div class="obsidian-image"><img src="/obsidian_images/${p1}" alt="${p1}" /></div>`;
+        return `<div class="obsidian-image"><img loading="lazy" src="/obsidian_images/${p1}" alt="${p1}" /></div>`;
       });
 
       let body = markedParser.parse(grayMatterParsed.content);
@@ -312,7 +312,7 @@ const blueskyImages = defineCollection({
         };
       })
       .filter((post) => {
-        const badPostIds = ["3lbrty5hplk2j", "3lc644skrfs2g"];
+        const badPostIds = ["3lbrty5hplk2j", "3lc644skrfs2g", "3ljnhw7efyc2c"];
 
         return !!post.images && !badPostIds.includes(post.id) && !post.hashtagsInPost.includes("meme");
       })
