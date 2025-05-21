@@ -21,77 +21,228 @@ const remainingPhotos = minimalPhotoData.slice(20); // Remaining photos
     Photos (<a href="/feeds/photos_rss.xml">RSS</a>)
   </h1>
 
-  <div class="masonry" id="masonry">
-    {
-      initialPhotos.map((photo) =>
-        photo.images.map((image) => (
-          <div class="masonry-item">
-            <a href={photo.postUrl} target="_blank">
-              <img loading="lazy" src={image.thumb} alt={image.alt} />
-            </a>
-          </div>
-        )),
-      )
-    }
+  <div class="masonry-container" id="masonry-container">
+    <div class="masonry-column" id="col-0"></div>
+    <div class="masonry-column" id="col-1"></div>
+    <div class="masonry-column" id="col-2"></div>
+    <div class="masonry-column" id="col-3"></div>
   </div>
-  <div images-data={JSON.stringify(remainingPhotos)} id="load-more"></div>
+  <div id="remaining-photos-data" style="display: none;" data-photos={JSON.stringify(remainingPhotos)}></div>
+  <div id="initial-photos-data" style="display: none;" data-photos={JSON.stringify(initialPhotos)}></div>
 </Layout>
 
 <script>
-  const photos = JSON.parse(document.getElementById("load-more")?.getAttribute("images-data") ?? "[]");
-  let loadedPhotos = 0;
+  // Load photo data
+  const remainingPhotosData = JSON.parse(document.getElementById("remaining-photos-data")?.getAttribute("data-photos") || "[]");
+  const initialPhotosData = JSON.parse(document.getElementById("initial-photos-data")?.getAttribute("data-photos") || "[]");
+  let loadedPhotoIndex = 0;
 
-  const loadMorePhotos = () => {
-    const masonry = document.getElementById("masonry");
-    const newPhotos = photos.slice(loadedPhotos, loadedPhotos + 20);
-    newPhotos.forEach((photo) => {
-      photo.images.forEach((image) => {
-        const div = document.createElement("div");
-        div.className = "masonry-item";
-        div.innerHTML = `<a href="${photo.postUrl}" target="_blank"><img loading="lazy" src="${image.thumb}" alt="${image.alt}" /></a>`;
-        masonry?.appendChild(div);
+  // Helper function to create image element
+  function createImageElement(image) {
+    const div = document.createElement("div");
+    div.className = "masonry-item";
+    div.innerHTML = `
+      <a href="${image.postUrl}" target="_blank" class="image-link">
+        <div class="image-container">
+          <div class="image-placeholder"></div>
+          <img loading="lazy" src="${image.thumb}" alt="${image.alt}" onload="this.classList.add('loaded')" />
+        </div>
+      </a>`;
+    return div;
+  }
+
+  // Get number of columns based on screen width
+  function getColumnCount() {
+    if (window.innerWidth <= 480) return 1;
+    if (window.innerWidth <= 768) return 2;
+    return 4;
+  }
+
+  // Flatten photo data helper
+  function flattenPhotoData(photoData) {
+    return photoData.flatMap(function (photo) {
+      return photo.images.map(function (image) {
+        return {
+          postUrl: photo.postUrl,
+          thumb: image.thumb,
+          alt: image.alt,
+        };
       });
     });
-    loadedPhotos += 20;
-  };
+  }
 
-  window.addEventListener("scroll", () => {
-    if (window.innerHeight + window.scrollY >= document.body.offsetHeight) {
+  // Function to distribute images across columns
+  function distributeImages(images) {
+    const columnCount = getColumnCount();
+    const columns: HTMLElement[] = [];
+
+    for (let i = 0; i < columnCount; i++) {
+      const col = document.getElementById(`col-${i}`);
+      if (col) columns.push(col);
+    }
+
+    // Distribute images across columns in left-to-right order
+    images.forEach(function (image, index) {
+      const columnIndex = index % columns.length;
+      const imageEl = createImageElement(image);
+      columns[columnIndex].appendChild(imageEl);
+    });
+  }
+
+  // Initial distribution
+  document.addEventListener("DOMContentLoaded", function () {
+    const initialFlattenedPhotos = flattenPhotoData(initialPhotosData);
+    distributeImages(initialFlattenedPhotos);
+  });
+
+  // Handle window resize to adjust columns
+  window.addEventListener("resize", function () {
+    // Clear all columns
+    const container = document.getElementById("masonry-container");
+    if (!container) return;
+
+    container.innerHTML = "";
+
+    // Recreate columns based on new screen size
+    const columnCount = getColumnCount();
+    for (let i = 0; i < columnCount; i++) {
+      const column = document.createElement("div");
+      column.className = "masonry-column";
+      column.id = `col-${i}`;
+      container.appendChild(column);
+    }
+
+    // Redistribute all loaded images
+    const initialFlattenedPhotos = flattenPhotoData(initialPhotosData);
+    const loadedRemaining = flattenPhotoData(remainingPhotosData.slice(0, loadedPhotoIndex));
+
+    distributeImages([...initialFlattenedPhotos, ...loadedRemaining]);
+  });
+
+  // Load more photos
+  function loadMorePhotos() {
+    if (loadedPhotoIndex >= remainingPhotosData.length) return;
+
+    const newPhotoBatch = remainingPhotosData.slice(loadedPhotoIndex, loadedPhotoIndex + 20);
+    loadedPhotoIndex += 20;
+
+    // Flatten the structure to get all images
+    const newImages = flattenPhotoData(newPhotoBatch);
+
+    // Distribute new images across columns
+    distributeImages(newImages);
+  }
+
+  // Load more on scroll
+  window.addEventListener("scroll", function () {
+    if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 200) {
       loadMorePhotos();
     }
   });
 </script>
 
-<style>
-  .masonry {
-    column-count: 4;
-    column-gap: 1rem;
+<style is:global>
+  h1 {
+    margin-bottom: 1.5rem;
+  }
+
+  .masonry-container {
+    display: flex;
+    width: 100%;
+    gap: 1rem;
     margin: 1em auto;
   }
 
+  .masonry-column {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
   .masonry-item {
-    break-inside: avoid;
-    margin-bottom: 1rem;
+    width: 100%;
+    transition: transform 0.3s ease;
+  }
+
+  .image-link {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+  }
+
+  .image-link:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  .image-container {
+    position: relative;
+    width: 100%;
+  }
+
+  .image-placeholder {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: 200% 100%;
+    animation: 1.5s shine linear infinite;
+  }
+
+  @keyframes shine {
+    to {
+      background-position-x: -200%;
+    }
   }
 
   .masonry-item img {
     width: 100%;
     display: block;
+    height: auto;
+    position: relative;
+    z-index: 1;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .masonry-item img.loaded {
+    opacity: 1;
+  }
+
+  @media (max-width: 992px) {
+    .masonry-container {
+      gap: 0.9rem;
+    }
+    .masonry-column {
+      gap: 0.9rem;
+    }
   }
 
   @media (max-width: 768px) {
-    .masonry {
-      column-count: 2;
+    .masonry-container {
+      gap: 0.8rem;
+    }
+    .masonry-column {
+      gap: 0.8rem;
     }
   }
 
   @media (max-width: 480px) {
-    .masonry {
-      column-count: 1;
+    .masonry-container {
+      flex-direction: column;
+      gap: 0.7rem;
     }
-
+    .masonry-column {
+      gap: 0.7rem;
+    }
     .masonry-item {
-      padding: 0 0.5rem;
+      padding: 0;
     }
   }
 </style>
