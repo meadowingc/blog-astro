@@ -4,22 +4,39 @@ import Layout from "../../layouts/Layout.astro";
 import type { ObsidianPost } from "../../schemas";
 
 export async function getStaticPaths() {
-  return (await getCollection("obsidianPublishedPosts"))
+  const allPosts = (await getCollection("obsidianPublishedPosts"))
     .map((col) => col.data)
-    .map((post) => {
-      return {
-        params: { slug: `${post.slug}` },
-        props: { post: post },
-      };
-    });
+    .sort((a, b) => b.publishedAt.getTime() - a.publishedAt.getTime());
+
+  return allPosts.map((post, index) => {
+    // Get next and previous posts - previous is older, next is newer
+    const prevPost = index < allPosts.length - 1 ? allPosts[index + 1] : null;
+    const nextPost = index > 0 ? allPosts[index - 1] : null;
+
+    // Get a random post (excluding current)
+    const otherPosts = allPosts.filter((p) => p.slug !== post.slug);
+    const randomPost = otherPosts[Math.floor(Math.random() * otherPosts.length)];
+
+    return {
+      params: { slug: `${post.slug}` },
+      props: {
+        post,
+        nextPost,
+        prevPost,
+        randomPost,
+      },
+    };
+  });
 }
 
 interface Props {
   post: ObsidianPost;
+  nextPost: ObsidianPost | null;
+  prevPost: ObsidianPost | null;
+  randomPost: ObsidianPost | null;
 }
 
-// const { slug } = Astro.params;
-const { post } = Astro.props;
+const { post, nextPost, prevPost, randomPost } = Astro.props;
 
 // const webmentions = await fetch(`GET https://webmention.io/api/mentions.jf2?target=meadow.cafe&token=6IoMTGKsJgWRMdCK7ilXgw&per-page=1000`)
 //   .then((res) => res.json())
@@ -98,11 +115,109 @@ const { post } = Astro.props;
 
     <a hidden rel="author" class="p-author h-card" href="https://meadow.cafe">Meadow</a>
     <link class="u-url" href={`https://meadow.cafe/blog/${post.slug}`} />
+
+    <nav class="post-navigation">
+      <div class="post-nav-links">
+        {
+          prevPost && (
+            <a href={`/blog/${prevPost.slug}`} class="prev-post">
+              <span class="nav-arrow">← Older Post</span>
+            </a>
+          )
+        }
+
+        {
+          randomPost && (
+            <a href={`/blog/${randomPost.slug}`} class="random-post">
+              <span class="nav-arrow">↺ Random</span>
+            </a>
+          )
+        }
+
+        {
+          nextPost && (
+            <a href={`/blog/${nextPost.slug}`} class="next-post">
+              <span class="nav-arrow">Newer Post →</span>
+            </a>
+          )
+        }
+      </div>
+    </nav>
   </article>
 </Layout>
 
 <style>
   .tag-link {
     margin-right: 0.5rem;
+  }
+
+  .post-navigation {
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #eaeaea;
+  }
+
+  .post-nav-links {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .post-nav-links a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem;
+    border-radius: 0.25rem;
+    text-decoration: none;
+    transition:
+      background-color 0.2s,
+      transform 0.1s;
+    flex: 1;
+    text-align: center;
+  }
+
+  .post-nav-links a:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    transform: translateY(-2px);
+  }
+
+  .post-nav-links a:active {
+    transform: translateY(0px);
+  }
+
+  .nav-arrow {
+    font-size: 0.9rem;
+    color: #666;
+  }
+  .nav-title {
+    font-size: 0.95rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+
+  .prev-post .nav-arrow,
+  .next-post .nav-arrow,
+  .random-post .nav-arrow {
+    display: inline-block;
+    font-weight: 500;
+  }
+
+  @media (max-width: 480px) {
+    .post-nav-links {
+      gap: 0.5rem;
+    }
+
+    .post-nav-links a {
+      padding: 0.5rem 0.4rem;
+      font-size: 0.85rem;
+    }
+
+    .nav-arrow {
+      font-size: 0.85rem;
+    }
   }
 </style>
