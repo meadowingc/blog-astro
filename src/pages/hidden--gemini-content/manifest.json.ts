@@ -4,6 +4,9 @@ export async function GET() {
   const posts = await getCollection("obsidianPublishedPosts");
   const dreams = await getCollection("obsidianPublishedDreams");
 
+  const allTags = posts.flatMap((post) => post.data.tags).sort();
+  const tags = Array.from(new Set(allTags));
+
   const files = [
     // Main pages
     "/atom.xml",
@@ -11,12 +14,16 @@ export async function GET() {
     "/posts.gmi",
     "/dreams.gmi",
     "/about.gmi",
+    "/tags.gmi",
 
     // Blog posts
     ...posts.map((post) => `/blog/${post.data.slug}.gmi`),
 
     // Dreams
     ...dreams.map((dream) => `/dreams/${dream.data.slug}.gmi`),
+
+    // Tags
+    ...tags.map((tag) => `/tags/${tag}.gmi`),
   ];
 
   const manifest = {
