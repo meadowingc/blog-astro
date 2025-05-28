@@ -1,5 +1,5 @@
 import { getCollection } from "astro:content";
-import { createGeminiHeader, createGeminiFooter } from "../../../utils/gemini.js";
+import { createGeminiHeader, createGeminiFooter } from "../../utils/gemini.js";
 
 export async function GET() {
   const allTags = (await getCollection("obsidianPublishedPosts"))
