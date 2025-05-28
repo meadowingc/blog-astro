@@ -6,6 +6,7 @@ export async function GET() {
 
   const files = [
     // Main pages
+    "/atom.xml",
     "/index.gmi",
     "/posts.gmi",
     "/dreams.gmi",

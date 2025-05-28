@@ -36,65 +36,68 @@ export function htmlToGemtext(html: string): string {
         case "p":
           // Extract links from paragraphs and append them after the paragraph text
           const currentLinks: { url: string; text: string; id: string }[] = [];
-          
-          const pContent = Array.from(element.childNodes).map(child => {
-            if (child.nodeType === dom.window.Node.ELEMENT_NODE && 
-                (child as Element).tagName.toLowerCase() === "a") {
-              const linkElement = child as Element;
-              const href = linkElement.getAttribute("href");
-              const linkText = linkElement.textContent?.trim() || "";
-              
-              if (href) {
-                linkCounter++;
-                const linkId = `[${linkCounter}]`;
-                
-                // Convert relative links to absolute for gemini
-                const absoluteHref = href.startsWith("http") ? href : 
-                                   href.startsWith("/") ? `https://meadow.cafe${href}` : href;
-                
-                currentLinks.push({
-                  url: encodeURI(absoluteHref),
-                  text: linkText,
-                  id: linkId
-                });
-                
-                return linkText + ` ${linkId}`;
+
+          const pContent = Array.from(element.childNodes)
+            .map((child) => {
+              if (child.nodeType === dom.window.Node.ELEMENT_NODE && (child as Element).tagName.toLowerCase() === "a") {
+                const linkElement = child as Element;
+                const href = linkElement.getAttribute("href");
+                const linkText = linkElement.textContent?.trim() || "";
+
+                if (href) {
+                  linkCounter++;
+                  const linkId = `[${linkCounter}]`;
+
+                  // Convert relative links to absolute for gemini
+                  const absoluteHref = href.startsWith("http")
+                    ? href
+                    : href.startsWith("/")
+                      ? `https://meadow.cafe${href}`
+                      : href;
+
+                  currentLinks.push({
+                    url: encodeURI(absoluteHref),
+                    text: linkText,
+                    id: linkId,
+                  });
+
+                  return linkText + ` ${linkId}`;
+                }
+                return linkText;
               }
-              return linkText;
-            }
-            return processNode(child, false);
-          }).join("");
+              return processNode(child, false);
+            })
+            .join("");
 
           let result = pContent.trim();
           if (result) {
             result += "\n\n";
-            
+
             // Add links after the paragraph
             if (currentLinks.length > 0) {
-              result += currentLinks.map(link => `=> ${link.url} ${link.id} ${link.text}`).join("\n") + "\n\n";
+              result += currentLinks.map((link) => `=> ${link.url} ${link.id} ${link.text}`).join("\n") + "\n\n";
             }
           }
-          
+
           return result;
 
         case "a":
           // This case should be handled by the parent element (p, li, etc.)
           const href = element.getAttribute("href");
           const linkText = element.textContent?.trim() || "";
-          
+
           if (href && extractLinks) {
             linkCounter++;
             const linkId = `[${linkCounter}]`;
-            
-            const absoluteHref = href.startsWith("http") ? href : 
-                               href.startsWith("/") ? `https://meadow.cafe${href}` : href;
-            
+
+            const absoluteHref = href.startsWith("http") ? href : href.startsWith("/") ? `https://meadow.cafe${href}` : href;
+
             extractedLinks.push({
               url: encodeURI(absoluteHref),
               text: linkText,
-              id: linkId
+              id: linkId,
             });
-            
+
             return linkText + ` ${linkId}`;
           }
           return linkText;
@@ -105,37 +108,42 @@ export function htmlToGemtext(html: string): string {
             .filter((child) => child.tagName.toLowerCase() === "li")
             .map((li) => {
               const currentLinks: { url: string; text: string; id: string }[] = [];
-              
-              const liContent = Array.from(li.childNodes).map(child => {
-                if (child.nodeType === dom.window.Node.ELEMENT_NODE && 
-                    (child as Element).tagName.toLowerCase() === "a") {
-                  const linkElement = child as Element;
-                  const href = linkElement.getAttribute("href");
-                  const linkText = linkElement.textContent?.trim() || "";
-                  
-                  if (href) {
-                    linkCounter++;
-                    const linkId = `[${linkCounter}]`;
-                    
-                    const absoluteHref = href.startsWith("http") ? href : 
-                                       href.startsWith("/") ? `https://meadow.cafe${href}` : href;
-                    
-                    currentLinks.push({
-                      url: encodeURI(absoluteHref),
-                      text: linkText,
-                      id: linkId
-                    });
-                    
-                    return linkText + ` ${linkId}`;
+
+              const liContent = Array.from(li.childNodes)
+                .map((child) => {
+                  if (child.nodeType === dom.window.Node.ELEMENT_NODE && (child as Element).tagName.toLowerCase() === "a") {
+                    const linkElement = child as Element;
+                    const href = linkElement.getAttribute("href");
+                    const linkText = linkElement.textContent?.trim() || "";
+
+                    if (href) {
+                      linkCounter++;
+                      const linkId = `[${linkCounter}]`;
+
+                      const absoluteHref = href.startsWith("http")
+                        ? href
+                        : href.startsWith("/")
+                          ? `https://meadow.cafe${href}`
+                          : href;
+
+                      currentLinks.push({
+                        url: encodeURI(absoluteHref),
+                        text: linkText,
+                        id: linkId,
+                      });
+
+                      return linkText + ` ${linkId}`;
+                    }
+                    return linkText;
                   }
-                  return linkText;
-                }
-                return processNode(child, false);
-              }).join("").trim();
+                  return processNode(child, false);
+                })
+                .join("")
+                .trim();
 
               let result = `* ${liContent}`;
               if (currentLinks.length > 0) {
-                result += "\n" + currentLinks.map(link => `  => ${link.url} ${link.id} ${link.text}`).join("\n");
+                result += "\n" + currentLinks.map((link) => `  => ${link.url} ${link.id} ${link.text}`).join("\n");
               }
               return result;
             })
@@ -144,10 +152,15 @@ export function htmlToGemtext(html: string): string {
 
         case "li":
           // Handled by ul/ol above
-          return Array.from(element.childNodes).map(child => processNode(child, false)).join("");
+          return Array.from(element.childNodes)
+            .map((child) => processNode(child, false))
+            .join("");
 
         case "blockquote":
-          const quoteContent = Array.from(element.childNodes).map(child => processNode(child, false)).join("").trim();
+          const quoteContent = Array.from(element.childNodes)
+            .map((child) => processNode(child, false))
+            .join("")
+            .trim();
           return `> ${quoteContent.replace(/\n/g, "\n> ")}\n\n`;
 
         case "code":
@@ -185,11 +198,15 @@ export function htmlToGemtext(html: string): string {
         case "article":
         case "section":
           // Just process children
-          return Array.from(element.childNodes).map(child => processNode(child, extractLinks)).join("");
+          return Array.from(element.childNodes)
+            .map((child) => processNode(child, extractLinks))
+            .join("");
 
         default:
           // For unknown elements, just process the text content
-          return Array.from(element.childNodes).map(child => processNode(child, extractLinks)).join("");
+          return Array.from(element.childNodes)
+            .map((child) => processNode(child, extractLinks))
+            .join("");
       }
     }
 
