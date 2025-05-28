@@ -13,7 +13,11 @@ export async function getStaticPaths() {
 export async function GET({ props }) {
   const { dream } = props;
 
-  let gemtext = createGeminiHeader(`💭 ${dream.title}`);
+  let gemtext = `# ${dream.title}\n\n`;
+  gemtext += `=> / 🏠 Home\n`;
+  gemtext += `=> /dreams.gmi ← Back to all dreams\n\n`;
+
+  gemtext += `---\n\n`;
 
   // Dream metadata
   gemtext += `Published: ${formatGeminiDate(dream.publishedAt)}\n\n`;

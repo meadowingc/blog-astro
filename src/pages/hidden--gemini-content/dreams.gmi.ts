@@ -6,7 +6,7 @@ export async function GET() {
     .map((col) => col.data)
     .sort((a, b) => b.publishedAt.getTime() - a.publishedAt.getTime());
 
-  let gemtext = createGeminiHeader("💭 Dreams");
+  let gemtext = createGeminiHeader("💭 Dreams", undefined, true);
 
   gemtext += `I have been keeping a dream journal for a while now, and I thought it would be fun to share some of the most interesting dreams here!\n\n`;
 

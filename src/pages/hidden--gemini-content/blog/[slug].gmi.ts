@@ -13,12 +13,16 @@ export async function getStaticPaths() {
 export async function GET({ props }) {
   const { post } = props;
 
-  let gemtext = createGeminiHeader(post.title);
+  let gemtext = `# ${post.title}\n\n`;
+  gemtext += `=> / 🏠 Home\n`;
+  gemtext += `=> /posts.gmi ← Back to all posts\n\n`;
+
+  gemtext += `---\n\n`;
 
   // Post metadata
   gemtext += `Published: ${formatGeminiDate(post.publishedAt)}\n\n`;
 
-  // Tags
+  // Tags names
   if (post.tags && post.tags.length > 0) {
     gemtext += `Tags: ${post.tags.join(", ")}\n\n`;
   }
@@ -29,6 +33,17 @@ export async function GET({ props }) {
   gemtext += htmlToGemtext(post.body);
 
   gemtext += createGeminiFooter();
+
+  // Tags
+  if (post.tags && post.tags.length > 0) {
+    gemtext += `Tags:\n`;
+    for (const tag of post.tags) {
+      gemtext += `=> /tags/${tag}.gmi ${tag}\n`;
+    }
+    gemtext += `\n`;
+  }
+
+  gemtext += `---\n\n`;
 
   // Navigation
   gemtext += `=> /posts.gmi ← Back to all posts\n`;

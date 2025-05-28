@@ -14,7 +14,7 @@ export async function GET() {
     return acc;
   }, {});
 
-  let gemtext = createGeminiHeader("🏷️ Tags");
+  let gemtext = createGeminiHeader("🏷️ Tags", undefined, true);
 
   gemtext += `Browse posts by tag.\n\n`;
 

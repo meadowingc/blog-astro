@@ -21,7 +21,7 @@ export async function getStaticPaths() {
 export async function GET({ props }) {
   const { posts, tag } = props;
 
-  let gemtext = createGeminiHeader(`🏷️ Tag: ${tag}`);
+  let gemtext = createGeminiHeader(`🏷️ Tag: ${tag}`, undefined, true);
 
   gemtext += `Posts tagged with "${tag}" (${posts.length} posts):\n\n`;
 
@@ -29,7 +29,6 @@ export async function GET({ props }) {
     gemtext += `=> /blog/${post.slug}.gmi ${formatGeminiDate(post.publishedAt)} - ${post.title}\n`;
   }
 
-  gemtext += `\n`;
   gemtext += createGeminiFooter();
   gemtext += `=> /tags/ ← All Tags\n`;
   gemtext += `=> / ← Home\n`;

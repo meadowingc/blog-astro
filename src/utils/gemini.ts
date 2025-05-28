@@ -238,13 +238,19 @@ export function formatGeminiDate(date: Date): string {
 /**
  * Generate gemtext header with site info
  */
-export function createGeminiHeader(title: string, subtitle?: string): string {
+export function createGeminiHeader(title: string, subtitle?: string, skipWebVersion: boolean = false): string {
   let header = `# ${title}\n\n`;
   if (subtitle) {
     header += `${subtitle}\n\n`;
   }
   header += `=> / 🏠 Home\n`;
-  header += `=> https://meadow.cafe/ 🌐 Web Version\n\n`;
+
+  if (!skipWebVersion) {
+    header += `=> https://meadow.cafe/ 🌐 Web Version\n\n`;
+  } else {
+    header += `\n`;
+  }
+
   header += `---\n\n`;
   return header;
 }

@@ -6,7 +6,7 @@ export async function GET() {
     .map((col) => col.data)
     .sort((a, b) => b.publishedAt.getTime() - a.publishedAt.getTime());
 
-  let gemtext = createGeminiHeader("📝 All Blog Posts");
+  let gemtext = createGeminiHeader("📝 All Blog Posts", undefined, true);
 
   gemtext += `All ${posts.length} blog posts, sorted by date (newest first):\n\n`;
 

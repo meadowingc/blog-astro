@@ -1,7 +1,7 @@
 import { createGeminiHeader, createGeminiFooter } from "../../utils/gemini.js";
 
 export async function GET() {
-  let gemtext = createGeminiHeader("ℹ️ About");
+  let gemtext = createGeminiHeader("ℹ️ About", undefined, true);
 
   gemtext += `Hi 🍃 Thanks for visiting my gemini space!\n\n`;
 
