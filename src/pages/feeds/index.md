@@ -10,3 +10,5 @@ I have a couple of feeds, each displaying different things.
 - [Photos Feed](/feeds/photos_rss.xml) — This tracks photos shared from Bluesky
 
 There's also one feed for each tag that I use on the site. You can find them on the actual [tags page](/tags).
+
+**Tip:** I'm starting to add audio versions to my blog posts! You can add any of the main RSS feeds to your podcast client and it should work automatically when posts have audio.

@@ -57,4 +57,5 @@ export const ObsidianDreamSchema = z.object({
   body: z.string(),
   metaDescription: z.string().optional(),
   metaImage: z.string().optional(),
+  audioVersion: z.string().optional(),
 });
