@@ -1,6 +1,7 @@
 ---
 import { getCollection } from "astro:content";
 import Layout from "../../layouts/Layout.astro";
+import AudioPlayer from "../../components/AudioPlayer.astro";
 import type { ObsidianPost } from "../../schemas";
 
 export async function getStaticPaths() {
@@ -104,6 +105,8 @@ const { post, nextPost, prevPost, randomPost } = Astro.props;
         </time>
       </i>
     </p>
+
+    {post.audioVersion && <AudioPlayer audioSrc={post.audioVersion} title={post.title} />}
 
     <div class="e-content p-name" set:html={post.body} />
 

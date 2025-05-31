@@ -18,6 +18,7 @@ const BLUESKY_IMAGES_CACHE_FILE_PATH = path.join(os.tmpdir(), "AstroBlog__Bluesk
 const baseObsidianPath = path.resolve("../obsidian-brain/Brian/");
 const attachmentsFolderPath = path.join(baseObsidianPath, "_attachments");
 const publicImagesFolderPath = path.resolve("./public/obsidian_images");
+const publicAudioFolderPath = path.resolve("./public/obsidian_audio");
 
 // now put every filename in the allKnownAttachments array if the file is not a directory (or recurse)
 const allKnownAttachments: string[] = [];
@@ -47,6 +48,18 @@ function copyImageToPublicFolder(imagePath: string) {
   }
 
   fs.copyFileSync(imagePath, destinationPath);
+}
+
+function copyAudioToPublicFolder(audioPath: string) {
+  const audioName = path.basename(audioPath);
+  const destinationPath = path.join(publicAudioFolderPath, audioName);
+
+  if (!fs.existsSync(publicAudioFolderPath)) {
+    fs.mkdirSync(publicAudioFolderPath, { recursive: true });
+  }
+
+  fs.copyFileSync(audioPath, destinationPath);
+  return `/obsidian_audio/${audioName}`;
 }
 
 async function loadDataPostsInFolder(
@@ -130,6 +143,17 @@ async function loadDataPostsInFolder(
         }
 
         frontMatter.slug = convertToSlug(frontMatter.title);
+      }
+
+      // Handle audio version if specified in frontmatter
+      if (frontMatter.audioVersion) {
+        const audioPath = path.join(attachmentsFolderPath, "audio", frontMatter.audioVersion);
+        if (fs.existsSync(audioPath)) {
+          frontMatter.audioVersion = copyAudioToPublicFolder(audioPath);
+        } else {
+          console.warn(`Audio file not found: ${frontMatter.audioVersion} for post ${file}`);
+          frontMatter.audioVersion = undefined;
+        }
       }
 
       return {

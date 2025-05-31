@@ -35,6 +35,7 @@ export const ObsidianPostSchema = z.object({
   body: z.string(),
   metaDescription: z.string().optional(),
   metaImage: z.string().optional(),
+  audioVersion: z.string().optional(),
 });
 
 export const ObsidianPageSchema = z.object({

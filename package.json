@@ -28,7 +28,8 @@
     "marked": "^15.0.6",
     "marked-footnote": "^1.2.4",
     "npm": "^11.0.0",
-    "typescript": "^5.7.3"
+    "typescript": "^5.7.3",
+    "wavesurfer.js": "^7.9.5"
   },
   "devDependencies": {
     "prettier": "^3.4.2"

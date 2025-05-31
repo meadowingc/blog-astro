@@ -1,0 +1,237 @@
+---
+export interface Props {
+  audioSrc: string;
+  title: string;
+}
+
+const { audioSrc, title } = Astro.props;
+const audioId = `audio-${Math.random().toString(36).substr(2, 9)}`;
+---
+
+<div class="audio-player-container">
+  <div class="audio-player" data-audio-src={audioSrc} data-audio-id={audioId} data-audio-title={title}>
+    <button id={`play-${audioId}`} class="play-btn">
+      <span class="play-icon">▶</span>
+      <span class="pause-icon" style="display: none;">⏸</span>
+    </button>
+    <div id={audioId} class="waveform"></div>
+    <span class="time-display">
+      <span id={`current-${audioId}`}>0:00</span>/<span id={`duration-${audioId}`}>0:00</span>
+    </span>
+    <span
+      class="audio-info-tooltip"
+      title="This is an AI-generated audio clip using my voice. A post about how I did this will be coming soon!"
+    >
+      ?
+    </span>
+  </div>
+</div>
+
+<script>
+  import WaveSurfer from "wavesurfer.js";
+
+  // Find all audio players on the page and initialize them
+  document.addEventListener("DOMContentLoaded", () => {
+    const audioPlayers = document.querySelectorAll(".audio-player[data-audio-src]");
+
+    audioPlayers.forEach((playerElement) => {
+      const htmlElement = playerElement as HTMLElement;
+      const audioSrc = htmlElement.dataset.audioSrc;
+      const audioId = htmlElement.dataset.audioId;
+      const audioTitle = htmlElement.dataset.audioTitle;
+
+      const container = document.getElementById(audioId!);
+      const playBtn = document.getElementById(`play-${audioId}`) as HTMLButtonElement;
+      const playIcon = playBtn?.querySelector(".play-icon") as HTMLElement;
+      const pauseIcon = playBtn?.querySelector(".pause-icon") as HTMLElement;
+      const currentTimeEl = document.getElementById(`current-${audioId}`) as HTMLElement;
+      const durationEl = document.getElementById(`duration-${audioId}`) as HTMLElement;
+
+      if (!container || !playBtn || !playIcon || !pauseIcon || !currentTimeEl || !durationEl) return;
+
+      try {
+        // Create WaveSurfer instance
+        const wavesurfer = WaveSurfer.create({
+          container: container,
+          waveColor: "var(--text-color)",
+          progressColor: "var(--link-color)",
+          cursorColor: "var(--link-color)",
+          barWidth: 1,
+          barGap: 1,
+          height: 40,
+          normalize: true,
+          backend: "WebAudio",
+          mediaControls: false,
+          url: audioSrc!,
+        });
+
+        // Format time helper
+        function formatTime(seconds) {
+          const minutes = Math.floor(seconds / 60);
+          const remainingSeconds = Math.floor(seconds % 60);
+          return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
+        }
+
+        // Update time display
+        wavesurfer.on("timeupdate", (currentTime) => {
+          currentTimeEl.textContent = formatTime(currentTime);
+        });
+
+        // Set duration when ready
+        wavesurfer.on("ready", () => {
+          const duration = wavesurfer.getDuration();
+          durationEl.textContent = formatTime(duration);
+        });
+
+        // Handle play/pause button
+        playBtn.addEventListener("click", () => {
+          wavesurfer.playPause();
+        });
+
+        // Update button state
+        wavesurfer.on("play", () => {
+          playIcon.style.display = "none";
+          pauseIcon.style.display = "inline";
+        });
+
+        wavesurfer.on("pause", () => {
+          playIcon.style.display = "inline";
+          pauseIcon.style.display = "none";
+        });
+
+        // Reset button when finished
+        wavesurfer.on("finish", () => {
+          playIcon.style.display = "inline";
+          pauseIcon.style.display = "none";
+        });
+
+        // Click to seek
+        wavesurfer.on("interaction", () => {
+          wavesurfer.play();
+        });
+      } catch (error) {
+        console.error("Failed to initialize WaveSurfer:", error);
+        // Fallback to basic HTML5 audio
+        container.innerHTML = `
+          <audio controls style="width: 100%;">
+            <source src="${audioSrc}" type="audio/wav">
+            <source src="${audioSrc}" type="audio/mpeg">
+            Your browser does not support the audio element.
+          </audio>
+        `;
+      }
+    });
+  });
+</script>
+
+<style>
+  .audio-player-container {
+    margin: 1.5rem 0;
+    padding: 1rem 0;
+    border-top: 1px dotted var(--text-color);
+    border-bottom: 1px dotted var(--text-color);
+  }
+
+  .audio-label {
+    font-family: var(--font-secondary);
+    font-size: 0.9rem;
+    color: var(--em-color);
+    font-style: italic;
+  }
+
+  .audio-player {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .play-btn {
+    background: transparent;
+    color: var(--text-color);
+    border: 1px solid var(--text-color);
+    border-radius: 2px;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 0.7rem;
+    transition: all 0.15s ease;
+    font-family: var(--font-secondary);
+    flex-shrink: 0;
+  }
+
+  .play-btn:hover {
+    background: var(--text-color);
+    color: var(--background-color);
+  }
+
+  .waveform {
+    flex: 1;
+    opacity: 0.8;
+    border-radius: 1px;
+    overflow: hidden;
+    min-width: 0;
+  }
+
+  .time-display {
+    font-family: var(--font-secondary);
+    font-size: 0.8rem;
+    color: var(--text-color);
+    opacity: 0.6;
+    flex-shrink: 0;
+    min-width: 70px;
+    text-align: right;
+  }
+
+  .audio-info-tooltip {
+    font-family: var(--font-secondary);
+    font-size: 0.8rem;
+    color: var(--text-color);
+    opacity: 0.5;
+    cursor: help;
+    border: 1px solid var(--text-color);
+    border-radius: 50%;
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: opacity 0.15s ease;
+    position: relative;
+  }
+
+  .audio-info-tooltip:hover {
+    opacity: 0.8;
+  }
+
+  @media (max-width: 600px) {
+    .audio-player-container {
+      margin: 1rem 0;
+      padding: 0.75rem 0;
+    }
+
+    .audio-player {
+      gap: 0.5rem;
+    }
+
+    .play-btn {
+      width: 24px;
+      height: 24px;
+      font-size: 0.6rem;
+    }
+
+    .time-display {
+      font-size: 0.75rem;
+      min-width: 60px;
+    }
+
+    .audio-info-tooltip {
+      width: 14px;
+      height: 14px;
+      font-size: 0.7rem;
+    }
+  }
+</style>
