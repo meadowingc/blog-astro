@@ -303,13 +303,15 @@ const blueskyImages = defineCollection({
         const images = !embedImages
           ? undefined
           : embedImages.map((image, imgIdx) => {
-              const { alt, fullsize, thumb, aspectRatio } = post.embed?.images?.[imgIdx];
+              const embedImageData = post.embed?.images?.[imgIdx];
+
+              const { alt, fullsize, thumb, aspectRatio } = embedImageData;
 
               return {
                 alt,
                 fullsize,
                 thumb,
-                aspectRatio,
+                aspectRatio: aspectRatio || { width: 16, height: 9 },
               };
             });
 
