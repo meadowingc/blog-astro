@@ -1,0 +1,19 @@
+---
+import { getCollection } from "astro:content";
+import MarkdownPageLayout from "../layouts/MarkdownPageLayout.astro";
+
+// Get the Home.md content from Obsidian pages
+const obsidianPages = await getCollection("obsidianPublishedPages");
+const homePage = obsidianPages.find((page) => page.id === "Home.md");
+
+if (!homePage) {
+  throw new Error("Home.md not found in Blog/Pages/ - build failed. Please ensure the file exists in your Obsidian notes.");
+}
+
+const homeContent = homePage.data.body;
+const homeData = { ...homePage.data, title: homePage.data.title || "Home" };
+---
+
+<MarkdownPageLayout frontmatter={homeData}>
+  <Fragment set:html={homeContent} />
+</MarkdownPageLayout>
