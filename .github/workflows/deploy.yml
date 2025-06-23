@@ -34,6 +34,7 @@ jobs:
           repository: meadowingc/obsidian-brain
           path: obsidian-brain
           token: ${{ secrets.OBSIDIAN_ACCESS_TOKEN }}
+          fetch-depth: 0
 
       # list pwd and ls to debug
       - name: List files in the repository
