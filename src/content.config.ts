@@ -380,7 +380,7 @@ const historicalNowPages = defineCollection({
       // Group commits by date (keep only the latest commit per date)
       const commitsByDate = new Map<string, { hash: string; date: string; subject: string }>();
       commits.forEach((commit) => {
-        if (!commitsByDate.has(commit.date) || commitsByDate.get(commit.date)?.hash === commits[0].hash) {
+        if (!commitsByDate.has(commit.date)) {
           commitsByDate.set(commit.date, commit);
         }
       });
