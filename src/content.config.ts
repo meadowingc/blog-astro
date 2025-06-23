@@ -1,5 +1,6 @@
 import { AtpAgent } from "@atproto/api";
 import { defineCollection } from "astro:content";
+import { execSync } from "child_process";
 import fs from "fs";
 import * as matter from "gray-matter";
 import { JSDOM } from "jsdom";
@@ -9,7 +10,7 @@ import markedFootnote from "marked-footnote";
 import os from "os";
 
 import path from "path";
-import { BlueskyImageSchema, ObsidianDreamSchema, ObsidianPageSchema, ObsidianPostSchema } from "./schemas";
+import { BlueskyImageSchema, NowPageSchema, ObsidianDreamSchema, ObsidianPageSchema, ObsidianPostSchema } from "./schemas";
 
 const CACHE_DURATION = 5 * 60 * 60 * 1000; // hours in milliseconds
 const BLUESKY_IMAGES_CACHE_FILE_PATH = path.join(os.tmpdir(), "AstroBlog__BlueskyImagesCache.json");
@@ -351,6 +352,94 @@ const blueskyImages = defineCollection({
   },
 });
 
+const historicalNowPages = defineCollection({
+  schema: NowPageSchema,
+  loader: async () => {
+    console.log(">> Loading Historical Now Pages data");
+
+    const nowFilePath = path.join(baseObsidianPath, "Blog/Pages/Now.md");
+    const markedParser = new Marked().use(markedFootnote());
+
+    try {
+      // Get git log for the Now.md file
+      const gitLogOutput = execSync(
+        `cd "${baseObsidianPath}" && git log --follow --pretty=format:"%H|%ad|%s" --date=short -- Blog/Pages/Now.md`,
+        { encoding: "utf-8" },
+      );
+
+      const commits = gitLogOutput
+        .trim()
+        .split("\n")
+        .map((line) => {
+          const [hash, date, subject] = line.split("|");
+          return { hash, date, subject };
+        });
+
+      console.log(`Found ${commits.length} commits for Now.md`);
+
+      // Group commits by date (keep only the latest commit per date)
+      const commitsByDate = new Map<string, { hash: string; date: string; subject: string }>();
+      commits.forEach((commit) => {
+        if (!commitsByDate.has(commit.date) || commitsByDate.get(commit.date)?.hash === commits[0].hash) {
+          commitsByDate.set(commit.date, commit);
+        }
+      });
+
+      console.log(`Found ${commitsByDate.size} unique dates for Now.md`);
+
+      // Get content for each unique date
+      const nowPages: Array<{
+        id: string;
+        title: string;
+        slug: string;
+        date: Date;
+        body: string;
+        commitHash: string;
+        commitDate: Date;
+      }> = [];
+
+      for (const [date, commit] of commitsByDate) {
+        try {
+          const content = execSync(`cd "${baseObsidianPath}" && git show ${commit.hash}:Brian/Blog/Pages/Now.md`, {
+            encoding: "utf-8",
+          });
+
+          // Parse the content
+          const grayMatterParsed = matter.default(content);
+
+          let body = markedParser.parse(grayMatterParsed.content);
+          if (body instanceof Promise) {
+            body = await body;
+          }
+
+          const parsedDate = new Date(date);
+          const slug = date; // Use the date as the slug (YYYY-MM-DD format)
+
+          nowPages.push({
+            id: slug,
+            title: `Now (${parsedDate.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })})`,
+            slug,
+            date: parsedDate,
+            body,
+            commitHash: commit.hash,
+            commitDate: parsedDate,
+          });
+        } catch (error) {
+          console.warn(`Failed to get content for commit ${commit.hash} on ${date}:`, (error as Error).message);
+        }
+      }
+
+      // Sort by date (newest first)
+      nowPages.sort((a, b) => b.date.getTime() - a.date.getTime());
+
+      return nowPages;
+    } catch (error) {
+      console.warn("Failed to load historical now pages:", (error as Error).message);
+      return [];
+    }
+  },
+});
+
 export const collections = {
   // 'blog': blogCollection,
   // 'newsletter': newsletter,
@@ -359,4 +448,5 @@ export const collections = {
   obsidianPublishedPosts,
   obsidianPublishedPages,
   obsidianPublishedDreams,
+  historicalNowPages,
 };

@@ -4,6 +4,7 @@ export type BlueskyImage = z.infer<typeof BlueskyImageSchema>;
 export type ObsidianPost = z.infer<typeof ObsidianPostSchema>;
 export type ObsidianPage = z.infer<typeof ObsidianPageSchema>;
 export type ObsidianDream = z.infer<typeof ObsidianDreamSchema>;
+export type NowPage = z.infer<typeof NowPageSchema>;
 
 export const BlueskyImageSchema = z.object({
   id: z.string(),
@@ -58,4 +59,14 @@ export const ObsidianDreamSchema = z.object({
   metaDescription: z.string().optional(),
   metaImage: z.string().optional(),
   audioVersion: z.string().optional(),
+});
+
+export const NowPageSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  slug: z.string(),
+  date: z.coerce.date(),
+  body: z.string(),
+  commitHash: z.string(),
+  commitDate: z.coerce.date(),
 });

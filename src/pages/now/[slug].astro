@@ -1,0 +1,81 @@
+---
+import { getCollection } from "astro:content";
+import Layout from "../../layouts/Layout.astro";
+import type { NowPage } from "../../schemas";
+
+export async function getStaticPaths() {
+  const allNowPages = (await getCollection("historicalNowPages"))
+    .map((col) => col.data)
+    .sort((a, b) => b.date.getTime() - a.date.getTime());
+
+  return allNowPages.map((nowPage) => {
+    return {
+      params: { slug: nowPage.slug },
+      props: { nowPage },
+    };
+  });
+}
+
+interface Props {
+  nowPage: NowPage;
+}
+
+const { nowPage } = Astro.props;
+---
+
+<Layout
+  pageTitle={nowPage.title}
+  openGraph={{
+    title: nowPage.title,
+    description: `What I was up to on ${nowPage.date.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}`,
+    url: `https://meadow.cafe/now/${nowPage.slug}`,
+    type: "article",
+  }}
+>
+  <article class="h-entry">
+    <h1 class="p-name">{nowPage.title}</h1>
+    <p>
+      <i>
+        <time class="dt-published" datetime={nowPage.date.toISOString()}>
+          {
+            nowPage.date.toLocaleDateString("en-US", {
+              month: "long",
+              day: "numeric",
+              year: "numeric",
+            })
+          }
+        </time>
+      </i>
+    </p>
+
+    <div class="e-content" set:html={nowPage.body} />
+
+    <nav class="now-navigation">
+      <p>
+        <a href="/now">← Back to current Now page</a> |
+        <a href="/now/archive">All Now pages</a>
+      </p>
+    </nav>
+
+    <a hidden rel="author" class="p-author h-card" href="https://meadow.cafe">Meadow</a>
+    <link class="u-url" href={`https://meadow.cafe/now/${nowPage.slug}`} />
+  </article>
+</Layout>
+
+<style>
+  .now-navigation {
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #eaeaea;
+    text-align: center;
+  }
+
+  .now-navigation a {
+    text-decoration: none;
+    color: #666;
+  }
+
+  .now-navigation a:hover {
+    text-decoration: underline;
+  }
+</style>

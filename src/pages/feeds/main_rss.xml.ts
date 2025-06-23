@@ -19,7 +19,16 @@ export async function GET({ site }) {
       slug: `/dreams/${dream.slug}/`,
     }));
 
-  const everything = [...posts, ...dreams];
+  const nowPages = (await getCollection("historicalNowPages"))
+    .map((col) => col.data)
+    .map((nowPage) => ({
+      ...nowPage,
+      title: `[NOW] ${nowPage.title}`,
+      slug: `/now/${nowPage.slug}/`,
+      publishedAt: nowPage.date, // Map date to publishedAt for consistency
+    }));
+
+  const everything = [...posts, ...dreams, ...nowPages];
   everything.sort((a, b) => b.publishedAt.getTime() - a.publishedAt.getTime());
 
   return rss({

@@ -1,0 +1,78 @@
+---
+import { getCollection } from "astro:content";
+import Layout from "../../layouts/Layout.astro";
+
+const allNowPages = (await getCollection("historicalNowPages"))
+  .map((col) => col.data)
+  .sort((a, b) => b.date.getTime() - a.date.getTime());
+---
+
+<Layout
+  pageTitle="Now Archive"
+  openGraph={{
+    title: "Now Archive - All My Now Pages",
+    description: `A chronological archive of all my "now" pages, showing what I was up to at different points in time.`,
+    url: "https://meadow.cafe/now/archive",
+    type: "website",
+  }}
+>
+  <h1>Now Archive (<a href="/feeds/now_rss.xml">RSS</a>)</h1>
+
+  <p>
+    This is a collection of all my <a href="https://nownownow.com/about">"now" pages</a> throughout time.
+  </p>
+
+  <section class="now-archive">
+    {
+      allNowPages.length === 0 ? (
+        <p>
+          <em>No historical now pages found.</em>
+        </p>
+      ) : (
+        <ul class="now-list">
+          {allNowPages.map((nowPage) => (
+            <li>
+              <a href={`/now/${nowPage.slug}`}>
+                <time datetime={nowPage.date.toISOString()}>
+                  {nowPage.date.toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })}
+                </time>
+              </a>
+            </li>
+          ))}
+        </ul>
+      )
+    }
+  </section>
+</Layout>
+
+<style>
+  .now-archive {
+    margin-top: 2rem;
+  }
+
+  .now-list {
+    list-style: disc;
+    padding-left: 1.5rem;
+    margin: 1rem 0;
+  }
+
+  .now-list li {
+    margin-bottom: 0.5rem;
+  }
+
+  .now-list time {
+    font-weight: 500;
+  }
+
+  @media (max-width: 768px) {
+    .now-archive h2 {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+  }
+</style>
