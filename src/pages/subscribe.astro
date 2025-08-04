@@ -1,0 +1,41 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout pageTitle="Subscribe">
+  <p>
+    If you want to keep up with my blog then you can <a href="/feeds/">subscribe to on of the RSS feed</a>, or you can subscribe
+    to my newsletter below.
+  </p>
+
+  <hr />
+
+  <h3>Subscribe to Newsletter</h3>
+
+  <p>I only use this newsletter for sending an update whenever there's a new post. I won't send any spam, I promise!</p>
+
+  <form
+    action="https://buttondown.com/api/emails/embed-subscribe/meadow"
+    method="post"
+    target="popupwindow"
+    onsubmit="window.open('https://buttondown.com/meadow', 'popupwindow')"
+    class="embeddable-buttondown-form"
+  >
+    <blockquote>
+      <div>
+        <label for="bd-email">Enter your email</label><br />
+        <input type="email" name="email" id="bd-email" />
+      </div>
+      <br />
+      <div>
+        <label for="subs_blog">I would love to read out your blog (if you want)</label><br />
+        <input type="text" name="metadata__subs_blog" id="subs_blog" placeholder="(optional) your blog's url" />
+      </div>
+      <br />
+      <input type="submit" value="Subscribe" />
+      <div><small> <a href="https://buttondown.com/refer/meadow" target="_blank">Powered by Buttondown.</a></small></div>
+    </blockquote>
+  </form>
+
+  <br />
+</Layout>
