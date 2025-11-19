@@ -34,19 +34,6 @@ const { nowPage } = Astro.props;
 >
   <article class="h-entry">
     <h1 class="p-name">{nowPage.title}</h1>
-    <p>
-      <i>
-        <time class="dt-published" datetime={nowPage.date.toISOString()}>
-          {
-            nowPage.date.toLocaleDateString("en-US", {
-              month: "long",
-              day: "numeric",
-              year: "numeric",
-            })
-          }
-        </time>
-      </i>
-    </p>
 
     <div class="e-content" set:html={nowPage.body} />
 

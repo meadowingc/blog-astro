@@ -67,6 +67,4 @@ export const NowPageSchema = z.object({
   slug: z.string(),
   date: z.coerce.date(),
   body: z.string(),
-  commitHash: z.string(),
-  commitDate: z.coerce.date(),
 });

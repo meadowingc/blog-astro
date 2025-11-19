@@ -1,0 +1,50 @@
+---
+import { getCollection } from "astro:content";
+import Layout from "../layouts/Layout.astro";
+
+const allNowPages = (await getCollection("historicalNowPages"))
+  .map((col) => col.data)
+  .sort((a, b) => b.date.getTime() - a.date.getTime());
+
+const latestNowPage = allNowPages[0];
+
+if (!latestNowPage) {
+  throw new Error("No now pages found");
+}
+---
+
+<Layout
+  pageTitle="Now"
+  openGraph={{
+    title: "Now",
+    description: `What I'm up to right now (as of ${latestNowPage.date.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })})`,
+    url: "https://meadow.cafe/now",
+    type: "article",
+  }}
+>
+  <article class="h-entry">
+    <div class="e-content" set:html={latestNowPage.body} />
+
+    <a hidden rel="author" class="p-author h-card" href="https://meadow.cafe">Meadow</a>
+    <link class="u-url" href="https://meadow.cafe/now" />
+    <a hidden rel="me" href="https://c.im/@meadow">Mastodon</a>
+  </article>
+</Layout>
+
+<style>
+  .now-navigation {
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #eaeaea;
+    text-align: center;
+  }
+
+  .now-navigation a {
+    text-decoration: none;
+    color: #666;
+  }
+
+  .now-navigation a:hover {
+    text-decoration: underline;
+  }
+</style>

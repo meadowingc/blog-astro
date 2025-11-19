@@ -1,6 +1,5 @@
 import { AtpAgent } from "@atproto/api";
 import { defineCollection } from "astro:content";
-import { execSync } from "child_process";
 import fs from "fs";
 import * as matter from "gray-matter";
 import { JSDOM } from "jsdom";
@@ -66,7 +65,7 @@ function copyAudioToPublicFolder(audioPath: string) {
 async function loadDataPostsInFolder(
   folderPath: string,
   needsPublishedDate: boolean,
-): Promise<{ id: string; body: string; [key: string]: any }[]> {
+): Promise<{ id: string; body: string;[key: string]: any }[]> {
   const actualFolderPath = path.resolve(path.join(baseObsidianPath, folderPath));
   const markdownFiles = fs.readdirSync(actualFolderPath).filter((file) => file.endsWith(".md"));
 
@@ -304,17 +303,17 @@ const blueskyImages = defineCollection({
         const images = !embedImages
           ? undefined
           : embedImages.map((image, imgIdx) => {
-              const embedImageData = post.embed?.images?.[imgIdx];
+            const embedImageData = post.embed?.images?.[imgIdx];
 
-              const { alt, fullsize, thumb, aspectRatio } = embedImageData;
+            const { alt, fullsize, thumb, aspectRatio } = embedImageData;
 
-              return {
-                alt,
-                fullsize,
-                thumb,
-                aspectRatio: aspectRatio || { width: 16, height: 9 },
-              };
-            });
+            return {
+              alt,
+              fullsize,
+              thumb,
+              aspectRatio: aspectRatio || { width: 16, height: 9 },
+            };
+          });
 
         const hashtagsInPost =
           record.facets?.flatMap((facet) => {
@@ -357,52 +356,28 @@ const historicalNowPages = defineCollection({
   loader: async () => {
     console.log(">> Loading Historical Now Pages data");
 
-    const nowFilePath = path.join(baseObsidianPath, "Blog/Pages/Now.md");
+    const nowFolderPath = path.join(baseObsidianPath, "Blog/Pages/Now");
     const markedParser = new Marked().use(markedFootnote());
 
     try {
-      // Get git log for the Now.md file
-      const gitLogOutput = execSync(
-        `cd "${baseObsidianPath}" && git log --follow --pretty=format:"%H|%ad|%s" --date=short -- Blog/Pages/Now.md`,
-        { encoding: "utf-8" },
-      );
+      // Read all .md files from the Now folder
+      const files = fs.readdirSync(nowFolderPath)
+        .filter(file => file.endsWith('.md') && /^\d{4}-\d{2}-\d{2}\.md$/.test(file));
 
-      const commits = gitLogOutput
-        .trim()
-        .split("\n")
-        .map((line) => {
-          const [hash, date, subject] = line.split("|");
-          return { hash, date, subject };
-        });
+      console.log(`Found ${files.length} now page files`);
 
-      console.log(`Found ${commits.length} commits for Now.md`);
-
-      // Group commits by date (keep only the latest commit per date)
-      const commitsByDate = new Map<string, { hash: string; date: string; subject: string }>();
-      commits.forEach((commit) => {
-        if (!commitsByDate.has(commit.date)) {
-          commitsByDate.set(commit.date, commit);
-        }
-      });
-
-      console.log(`Found ${commitsByDate.size} unique dates for Now.md`);
-
-      // Get content for each unique date
       const nowPages: Array<{
         id: string;
         title: string;
         slug: string;
         date: Date;
         body: string;
-        commitHash: string;
-        commitDate: Date;
       }> = [];
 
-      for (const [date, commit] of commitsByDate) {
+      for (const file of files) {
         try {
-          const content = execSync(`cd "${baseObsidianPath}" && git show ${commit.hash}:Brian/Blog/Pages/Now.md`, {
-            encoding: "utf-8",
-          });
+          const filePath = path.join(nowFolderPath, file);
+          const content = fs.readFileSync(filePath, 'utf-8');
 
           // Parse the content
           const grayMatterParsed = matter.default(content);
@@ -412,8 +387,11 @@ const historicalNowPages = defineCollection({
             body = await body;
           }
 
-          const parsedDate = new Date(date);
-          const slug = date; // Use the date as the slug (YYYY-MM-DD format)
+          // Extract date from filename (YYYY-MM-DD.md)
+          const slug = file.replace('.md', '');
+          // Parse as local date to avoid timezone issues
+          const [year, month, day] = slug.split('-').map(Number);
+          const parsedDate = new Date(year, month - 1, day);
 
           nowPages.push({
             id: slug,
@@ -421,16 +399,16 @@ const historicalNowPages = defineCollection({
             slug,
             date: parsedDate,
             body,
-            commitHash: commit.hash,
-            commitDate: parsedDate,
           });
         } catch (error) {
-          console.warn(`Failed to get content for commit ${commit.hash} on ${date}:`, (error as Error).message);
+          console.warn(`Failed to process now page ${file}:`, (error as Error).message);
         }
       }
 
       // Sort by date (newest first)
       nowPages.sort((a, b) => b.date.getTime() - a.date.getTime());
+
+      console.log(`Successfully loaded ${nowPages.length} now pages`);
 
       return nowPages;
     } catch (error) {
