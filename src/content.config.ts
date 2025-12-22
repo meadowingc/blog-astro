@@ -9,7 +9,7 @@ import markedFootnote from "marked-footnote";
 import os from "os";
 
 import path from "path";
-import { BlueskyImageSchema, NowPageSchema, ObsidianDreamSchema, ObsidianPageSchema, ObsidianPostSchema } from "./schemas";
+import { BlueskyImageSchema, NowPageSchema, ObsidianDreamSchema, ObsidianPageSchema, ObsidianPostSchema, ObsidianWildflowerSchema } from "./schemas";
 
 const CACHE_DURATION = 5 * 60 * 60 * 1000; // hours in milliseconds
 const BLUESKY_IMAGES_CACHE_FILE_PATH = path.join(os.tmpdir(), "AstroBlog__BlueskyImagesCache.json");
@@ -245,6 +245,20 @@ const obsidianPublishedDreams = defineCollection({
   },
 });
 
+const obsidianPublishedWildflowers = defineCollection({
+  schema: ObsidianWildflowerSchema,
+  loader: async () => {
+    console.log(">> Loading Obsidian Published Wildflowers data");
+    const wildflowersInFolder = (await loadDataPostsInFolder("Blog/Vomits", false))
+      // ignore files starting with underscore (drafts)
+      .filter((wildflower) => !wildflower.filename.startsWith("_"))
+      // only include wildflowers that have a publishedAt date
+      .filter((wildflower) => wildflower.publishedAt);
+
+    return wildflowersInFolder;
+  },
+});
+
 const blueskyImages = defineCollection({
   schema: BlueskyImageSchema,
   loader: async () => {
@@ -426,5 +440,6 @@ export const collections = {
   obsidianPublishedPosts,
   obsidianPublishedPages,
   obsidianPublishedDreams,
+  obsidianPublishedWildflowers,
   historicalNowPages,
 };

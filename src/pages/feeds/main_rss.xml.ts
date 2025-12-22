@@ -19,6 +19,14 @@ export async function GET({ site }) {
       slug: `/dreams/${dream.slug}/`,
     }));
 
+  const wildflowers = (await getCollection("obsidianPublishedWildflowers"))
+    .map((col) => col.data)
+    .map((wildflower) => ({
+      ...wildflower,
+      title: `[VOMIT] ${wildflower.title}`,
+      slug: `/vomits/${wildflower.slug}/`,
+    }));
+
   const nowPages = (await getCollection("historicalNowPages"))
     .map((col) => col.data)
     .map((nowPage) => ({
@@ -28,7 +36,7 @@ export async function GET({ site }) {
       publishedAt: nowPage.date, // Map date to publishedAt for consistency
     }));
 
-  const everything = [...posts, ...dreams, ...nowPages];
+  const everything = [...posts, ...dreams, ...wildflowers, ...nowPages];
   everything.sort((a, b) => b.publishedAt.getTime() - a.publishedAt.getTime());
 
   return rss({

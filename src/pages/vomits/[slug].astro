@@ -1,0 +1,102 @@
+---
+import { getCollection } from "astro:content";
+import Layout from "../../layouts/Layout.astro";
+import type { ObsidianWildflower } from "../../schemas";
+
+export async function getStaticPaths() {
+  return (await getCollection("obsidianPublishedWildflowers"))
+    .map((col) => col.data)
+    .map((wildflower) => {
+      return {
+        params: { slug: `${wildflower.slug}` },
+        props: { wildflower },
+      };
+    });
+}
+
+interface Props {
+  wildflower: ObsidianWildflower;
+}
+
+const { wildflower } = Astro.props;
+---
+
+<Layout
+  pageTitle={wildflower.title}
+  openGraph={{
+    title: wildflower.title,
+    image: wildflower.metaImage,
+    description: wildflower.metaDescription,
+    url: `https://meadow.cafe/vomits/${wildflower.slug}`,
+    type: "article",
+    articlePublishedTime: wildflower.publishedAt,
+    articleAuthor: "Meadow",
+  }}
+>
+  <style is:inline>
+    .obsidian-image img {
+      max-width: 100%;
+      margin: 0 auto;
+      display: block;
+    }
+  </style>
+
+  <article class="h-entry">
+    <header class="vomit-header">
+      <h1 class="p-name">{wildflower.title}</h1>
+      {
+        wildflower.subtitle && (
+          <p class="subtitle">
+            <em>{wildflower.subtitle}</em>
+          </p>
+        )
+      }
+      <span class="published-date">
+        <time class="dt-published" datetime={wildflower.publishedAt.toISOString()}>
+          {
+            wildflower.publishedAt.toLocaleDateString("en-US", {
+              month: "short",
+              day: "numeric",
+              year: "numeric",
+            })
+          }
+        </time>
+      </span>
+    </header>
+
+    <div class="e-content p-name vomit-content" set:html={wildflower.body} />
+
+    <a hidden rel="author" class="p-author h-card" href="https://meadow.cafe">Meadow</a>
+    <link class="u-url" href={`https://meadow.cafe/vomits/${wildflower.slug}`} />
+    <a hidden rel="me" href="https://c.im/@meadow">Mastodon</a>
+  </article>
+</Layout>
+
+<style>
+  .vomit-header {
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px dashed rgba(136, 136, 136, 0.3);
+  }
+
+  .vomit-header h1 {
+    margin-bottom: 0.5rem;
+  }
+
+  .subtitle {
+    color: #999;
+    font-size: 1.1em;
+    margin: 0.5rem 0 1rem 0;
+  }
+
+  .published-date {
+    font-size: 0.85em;
+    color: #777;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .vomit-content {
+    line-height: 1.7;
+  }
+</style>

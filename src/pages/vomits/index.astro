@@ -1,0 +1,104 @@
+---
+import { getCollection } from "astro:content";
+import Layout from "../../layouts/Layout.astro";
+
+const allWildflowers = (await getCollection("obsidianPublishedWildflowers"))
+  .map((col) => col.data)
+  .sort((a, b) => b.publishedAt.getTime() - a.publishedAt.getTime());
+---
+
+<style>
+  .vomit-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .vomit-entry {
+    padding: 1rem 0;
+    border-bottom: 1px dashed rgba(136, 136, 136, 0.3);
+    transition: background-color 0.2s ease;
+  }
+
+  .vomit-entry:last-child {
+    border-bottom: none;
+  }
+
+  .vomit-entry:hover {
+    background-color: rgba(255, 255, 255, 0.02);
+  }
+
+  .title-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .vomit-title {
+    font-size: 1.05em;
+    /* text-decoration: underline;
+    text-decoration-style: wavy;
+    text-decoration-color: rgba(136, 136, 136, 0.4);
+    text-underline-offset: 3px; */
+    text-decoration: none;
+  }
+
+  .vomit-title:hover {
+    /* text-decoration-color: inherit; */
+    text-decoration: none;
+  }
+
+  .subtitle {
+    color: #999;
+    font-style: italic;
+    font-size: 0.9em;
+    margin-top: 0.1rem;
+  }
+
+  .published-date {
+    font-size: 0.75em;
+    color: #777;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+</style>
+
+<Layout pageTitle={"Vomits"}>
+  <h1 id="vomits">Vomits</h1>
+  <p>
+    These are low-pressure, almost stream-of-consciousness posts, which are all basically unedited except for a quick grammar
+    check so proceed at your own risk! If you're interested in my motivation to do this then check out the <a
+      href="/vomits/0001-setting-wordvomit-goals"
+    >
+      first post</a
+    >.
+  </p>
+
+  <hr />
+
+  <section>
+    <ul class="vomit-list">
+      {
+        allWildflowers.map((wildflower) => (
+          <li class="vomit-entry">
+            <div class="title-group">
+              <small class="published-date">
+                <time datetime={wildflower.publishedAt.toISOString()}>
+                  {wildflower.publishedAt.toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                  })}
+                </time>
+              </small>
+              <a class="vomit-title" href={`/vomits/${wildflower.slug}`}>
+                {wildflower.title}
+              </a>
+              {wildflower.subtitle && <div class="subtitle">{wildflower.subtitle}</div>}
+            </div>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+</Layout>

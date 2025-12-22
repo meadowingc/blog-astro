@@ -7,6 +7,7 @@ I have a couple of feeds, each displaying different things.
 
 - [_"Everything"_ Feed](/feeds/main_rss.xml) — This tracks everything that I publish on the site (blog/journal). New sections that I might add in the future will also be included here.
 - [Blog Posts Feed](/feeds/blog_rss.xml) — This tracks only the blog posts
+- [Vomits Feed](/feeds/vomits_rss.xml) — This tracks stream-of-consciousness entries
 - [Now Pages Feed](/feeds/now_rss.xml) — This tracks updates to my "now" page, showing what I was up to at different points in time
 - [Photos Feed](/feeds/photos_rss.xml) — This tracks photos shared from Bluesky
 
