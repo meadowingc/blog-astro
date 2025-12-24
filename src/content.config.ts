@@ -62,6 +62,65 @@ function copyAudioToPublicFolder(audioPath: string) {
   return `/obsidian_audio/${audioName}`;
 }
 
+/**
+ * Wraps consecutive obsidian-image divs (2 or more) in a gallery container
+ * for masonry layout display. Uses DOM parsing for robustness.
+ */
+function wrapConsecutiveImagesInGallery(html: string): string {
+  const dom = new JSDOM(`<body>${html}</body>`);
+  const document = dom.window.document;
+  const body = document.body;
+
+  // Find all obsidian-image divs
+  const imageElements = Array.from(body.querySelectorAll<Element>('.obsidian-image'));
+
+  // Group consecutive images
+  const processedImages = new Set<Element>();
+
+  for (const img of imageElements as Element[]) {
+    if (processedImages.has(img)) continue;
+
+    // Collect consecutive images starting from this one
+    const consecutiveImages: Element[] = [img];
+    let nextSibling = img.nextSibling;
+
+    while (nextSibling) {
+      // Skip whitespace-only text nodes
+      if (nextSibling.nodeType === 3 && nextSibling.textContent?.trim() === '') {
+        nextSibling = nextSibling.nextSibling;
+        continue;
+      }
+
+      // Check if it's another obsidian-image
+      if (nextSibling.nodeType === 1 && (nextSibling as Element).classList?.contains('obsidian-image')) {
+        consecutiveImages.push(nextSibling as Element);
+        nextSibling = nextSibling.nextSibling;
+        continue;
+      }
+
+      // Any other element breaks the sequence
+      break;
+    }
+
+    // If we have 2+ consecutive images, wrap them in a gallery
+    if (consecutiveImages.length >= 2) {
+      const gallery = document.createElement('div');
+      gallery.className = 'image-gallery';
+
+      // Insert gallery before the first image
+      consecutiveImages[0].parentNode?.insertBefore(gallery, consecutiveImages[0]);
+
+      // Move all consecutive images into the gallery
+      for (const imgEl of consecutiveImages) {
+        gallery.appendChild(imgEl);
+        processedImages.add(imgEl);
+      }
+    }
+  }
+
+  return body.innerHTML;
+}
+
 async function loadDataPostsInFolder(
   folderPath: string,
   needsPublishedDate: boolean,
@@ -101,6 +160,9 @@ async function loadDataPostsInFolder(
       if (body instanceof Promise) {
         body = await body;
       }
+
+      // Wrap consecutive images in a gallery container
+      body = wrapConsecutiveImagesInGallery(body);
 
       // wallback title
       frontMatter.title ||= file.replace(/\.md$/, "");
