@@ -3,6 +3,10 @@ import Layout from "../layouts/Layout.astro";
 ---
 
 <Layout pageTitle="Subscribe">
+  <h2>Subscribe</h2>
+
+  <h3>RSS Feed</h3>
+
   <p>
     If you want to keep up with my blog then you can <a href="/feeds/">subscribe to on of the RSS feed</a>, or you can subscribe
     to my newsletter below.
@@ -10,9 +14,7 @@ import Layout from "../layouts/Layout.astro";
 
   <hr />
 
-  <h3>Subscribe to Newsletter</h3>
-
-  <p>I only use this newsletter for sending an update whenever there's a new post. I won't send any spam, I promise!</p>
+  <h3>Email</h3>
 
   <form
     action="https://buttondown.com/api/emails/embed-subscribe/meadow"
@@ -21,21 +23,44 @@ import Layout from "../layouts/Layout.astro";
     onsubmit="window.open('https://buttondown.com/meadow', 'popupwindow')"
     class="embeddable-buttondown-form"
   >
-    <blockquote>
-      <div>
-        <label for="bd-email">Enter your email</label><br />
-        <input type="email" name="email" id="bd-email" />
-      </div>
-      <br />
-      <div>
-        <label for="subs_blog">I would love to read out your blog (if you want)</label><br />
-        <input type="text" name="metadata__subs_blog" id="subs_blog" placeholder="(optional) your blog's url" />
-      </div>
-      <br />
-      <input type="submit" value="Subscribe" />
-      <div><small> <a href="https://buttondown.com/refer/meadow" target="_blank">Powered by Buttondown.</a></small></div>
-    </blockquote>
+    <div>
+      <label for="bd-email">Enter your email</label><br />
+      <input type="email" name="email" id="bd-email" />
+    </div>
+    <br />
+    <fieldset>
+      <legend>What would you like to receive?</legend>
+      <label><input type="checkbox" class="pref-checkbox" value="blog" checked /> Blog posts</label><br />
+      <label><input type="checkbox" class="pref-checkbox" value="vomits" /> Vomits</label><br />
+      <label><input type="checkbox" class="pref-checkbox" value="dreams" /> Dreams</label><br />
+      <label><input type="checkbox" class="pref-checkbox" value="now" /> Now page updates</label><br />
+      <input type="hidden" name="metadata__subscriptions" id="subscriptions-field" />
+    </fieldset>
+    <br />
+    <div>
+      <label for="subs_blog">I would love to read your blog (if you want)</label><br />
+      <input type="text" name="metadata__subs_blog" id="subs_blog" placeholder="(optional) your blog's url" />
+    </div>
+    <br />
+    <input type="submit" value="Subscribe" />
+    <div><small> <a href="https://buttondown.com/refer/meadow" target="_blank">Powered by Buttondown.</a></small></div>
   </form>
 
   <br />
 </Layout>
+
+<script>
+  const prefSubsCheckboxes = document.querySelectorAll(".pref-checkbox");
+  const chosenSubsHiddenField = document.getElementById("subscriptions-field") as HTMLInputElement;
+
+  function updateSubscriptions() {
+    const selected = Array.from(prefSubsCheckboxes)
+      .filter((cb): cb is HTMLInputElement => cb instanceof HTMLInputElement && cb.checked)
+      .map((cb) => cb.value);
+    chosenSubsHiddenField.value = selected.join(", ");
+  }
+
+  // Update on load and on change
+  updateSubscriptions();
+  prefSubsCheckboxes.forEach((cb) => cb.addEventListener("change", updateSubscriptions));
+</script>
