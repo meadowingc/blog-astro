@@ -429,7 +429,7 @@ const blueskyImages = defineCollection({
 const historicalNowPages = defineCollection({
   schema: NowPageSchema,
   loader: async () => {
-    console.log(">> Loading Historical Now Pages data");
+    console.log(">> Loading Now Pages");
 
     const nowFolderPath = path.join(baseObsidianPath, "Blog/Pages/Now");
     const markedParser = new Marked().use(markedFootnote());
@@ -470,7 +470,8 @@ const historicalNowPages = defineCollection({
 
           nowPages.push({
             id: slug,
-            title: `Now (${parsedDate.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })})`,
+            title: `Now (${parsedDate.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric", timeZone: "America/Costa_Rica" })})`,
+
             slug,
             date: parsedDate,
             body,

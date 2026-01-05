@@ -56,7 +56,7 @@ days.forEach((day, dayIndex) => {
       seenMonths.add(monthKey);
       const weekIndex = Math.floor(dayIndex / 7);
       monthLabels.push({
-        name: day.date.toLocaleDateString("en-US", { month: "short" }),
+        name: day.date.toLocaleDateString("en-US", { month: "short", timeZone: "America/Costa_Rica" }),
         weekIndex,
       });
     }
@@ -348,6 +348,7 @@ const gridWidth = weeksData.length * 15 - 3; // 15px per column, minus last gap
                       month: "short",
                       day: "numeric",
                       year: "numeric",
+                      timeZone: "America/Costa_Rica",
                     })}`;
                 return (
                   <div

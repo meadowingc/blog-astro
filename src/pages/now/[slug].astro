@@ -27,7 +27,8 @@ const { nowPage } = Astro.props;
   pageTitle={nowPage.title}
   openGraph={{
     title: nowPage.title,
-    description: `What I was up to on ${nowPage.date.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}`,
+    description: `What I was up to on ${nowPage.date.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric", timeZone: "America/Costa_Rica" })}`,
+
     url: `https://meadow.cafe/now/${nowPage.slug}`,
     type: "article",
   }}

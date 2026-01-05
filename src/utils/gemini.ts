@@ -416,6 +416,7 @@ export function formatGeminiDate(date: Date): string {
     year: "numeric",
     month: "long",
     day: "numeric",
+    timeZone: "America/Costa_Rica",
   });
 }
 
