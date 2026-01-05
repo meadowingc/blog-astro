@@ -13,7 +13,7 @@ export async function GET() {
   // Group posts by year
   const postsByYear = posts.reduce(
     (acc, post) => {
-      const year = post.publishedAt.getFullYear();
+      const year = parseInt(post.publishedAt.toLocaleString("en-US", { year: "numeric", timeZone: "America/Costa_Rica" }));
       if (!acc[year]) acc[year] = [];
       acc[year].push(post);
       return acc;

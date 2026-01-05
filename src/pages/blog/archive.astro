@@ -10,8 +10,8 @@ const allPosts = (await getCollection("obsidianPublishedPosts"))
 const postsByMonth: {
   [key: string]: ObsidianPost[];
 } = allPosts.reduce((acc, post: ObsidianPost) => {
-  const month = post.publishedAt.toLocaleString("default", { month: "long" });
-  const year = post.publishedAt.getFullYear();
+  const month = post.publishedAt.toLocaleString("en-US", { month: "long", timeZone: "America/Costa_Rica" });
+  const year = post.publishedAt.toLocaleString("en-US", { year: "numeric", timeZone: "America/Costa_Rica" });
   const monthYear = `${year} ${month}`;
 
   if (!acc[monthYear]) {
