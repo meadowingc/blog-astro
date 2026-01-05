@@ -1,39 +1,41 @@
+// Legacy vomits feed - now serves wordvomit-tagged posts from the blog
+// Kept for backwards compatibility with existing subscribers
 import rss from "@astrojs/rss";
 import { getCollection } from "astro:content";
 import fs from "fs";
 import path from "path";
 
 export async function GET({ site }) {
-  const wildflowers = (await getCollection("obsidianPublishedWildflowers"))
+  const vomitPosts = (await getCollection("obsidianPublishedPosts"))
     .map((col) => col.data)
+    .filter((post) => post.tags.includes("wordvomit"))
     .sort((a, b) => b.publishedAt.getTime() - a.publishedAt.getTime());
 
   return rss({
-    title: "Meadow - Vomits",
-    description: "Erratic misfiring of an addled brain.",
+    title: "Meadow - Vomits (now part of Blog)",
+    description: "Stream-of-consciousness posts. This feed is now part of the main blog feed.",
     site: site,
     stylesheet: "/rss/pretty-feed-v3.xsl",
-    items: wildflowers.map((wildflower) => {
+    items: vomitPosts.map((post) => {
       const item: any = {
-        title: `${wildflower.title}`,
-        link: `/vomits/${wildflower.slug}/`,
-        pubDate: wildflower.publishedAt,
-        description: wildflower.body,
+        title: `${post.title}`,
+        link: `/blog/${post.slug}/`,
+        pubDate: post.publishedAt,
+        description: post.body,
       };
 
-      // Add audio enclosure if the wildflower has an audio version
-      if (wildflower.audioVersion) {
+      if (post.audioVersion) {
         try {
-          const audioPath = path.join(process.cwd(), "public", wildflower.audioVersion.replace(/^\//, ""));
+          const audioPath = path.join(process.cwd(), "public", post.audioVersion.replace(/^\//, ""));
           const stats = fs.statSync(audioPath);
 
           item.enclosure = {
-            url: new URL(wildflower.audioVersion, site).href,
+            url: new URL(post.audioVersion, site).href,
             length: stats.size,
             type: "audio/wav",
           };
         } catch (error) {
-          console.warn(`Could not get file stats for audio: ${wildflower.audioVersion}`, error);
+          console.warn(`Could not get file stats for audio: ${post.audioVersion}`, error);
         }
       }
 

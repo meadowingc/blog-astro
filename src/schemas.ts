@@ -29,6 +29,7 @@ export const BlueskyImageSchema = z.object({
 export const ObsidianPostSchema = z.object({
   id: z.string(),
   title: z.string(),
+  subtitle: z.string().optional(),
   slug: z.string(),
   filename: z.string(),
   publishedAt: z.coerce.date(),

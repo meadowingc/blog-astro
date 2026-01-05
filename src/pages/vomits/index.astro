@@ -2,8 +2,9 @@
 import { getCollection } from "astro:content";
 import Layout from "../../layouts/Layout.astro";
 
-const allWildflowers = (await getCollection("obsidianPublishedWildflowers"))
+const allVomits = (await getCollection("obsidianPublishedPosts"))
   .map((col) => col.data)
+  .filter((post) => post.tags.includes("wordvomit"))
   .sort((a, b) => b.publishedAt.getTime() - a.publishedAt.getTime());
 ---
 
@@ -68,7 +69,7 @@ const allWildflowers = (await getCollection("obsidianPublishedWildflowers"))
   <p>
     These are low-pressure, almost stream-of-consciousness posts, which are all basically unedited except for a quick grammar
     check so proceed at your own risk! If you're interested in my motivation to do this then check out the <a
-      href="/vomits/0001-setting-wordvomit-goals"
+      href="/blog/0001-setting-wordvomit-goals"
     >
       first post</a
     >.
@@ -76,25 +77,31 @@ const allWildflowers = (await getCollection("obsidianPublishedWildflowers"))
 
   <hr />
 
+  <p>
+    <em>Note: Vomits are now part of the main <a href="/blog/">blog</a>. This page exists for old links.</em>
+  </p>
+
+  <hr />
+
   <section>
     <ul class="vomit-list">
       {
-        allWildflowers.map((wildflower) => (
+        allVomits.map((post) => (
           <li class="vomit-entry">
             <div class="title-group">
               <small class="published-date">
-                <time datetime={wildflower.publishedAt.toISOString()}>
-                  {wildflower.publishedAt.toLocaleDateString("en-US", {
+                <time datetime={post.publishedAt.toISOString()}>
+                  {post.publishedAt.toLocaleDateString("en-US", {
                     year: "numeric",
                     month: "short",
                     day: "numeric",
                   })}
                 </time>
               </small>
-              <a class="vomit-title" href={`/vomits/${wildflower.slug}`}>
-                {wildflower.title}
+              <a class="vomit-title" href={`/blog/${post.slug}`}>
+                {post.title}
               </a>
-              {wildflower.subtitle && <div class="subtitle">{wildflower.subtitle}</div>}
+              {post.subtitle && <div class="subtitle">{post.subtitle}</div>}
             </div>
           </li>
         ))

@@ -92,6 +92,13 @@ const { post, nextPost, prevPost, randomPost } = Astro.props;
 
   <article class="h-entry">
     <h1 class="p-name">{post.title}</h1>
+    {
+      post.subtitle && (
+        <p class="subtitle">
+          <em>{post.subtitle}</em>
+        </p>
+      )
+    }
     <p>
       <i>
         <time class="dt-published" datetime={post.publishedAt.toISOString()}>
@@ -152,6 +159,12 @@ const { post, nextPost, prevPost, randomPost } = Astro.props;
 </Layout>
 
 <style>
+  .subtitle {
+    color: #999;
+    font-size: 1.1em;
+    margin: 0.5rem 0 1rem 0;
+  }
+
   .tag-link {
     margin-right: 0.5rem;
     white-space: nowrap;

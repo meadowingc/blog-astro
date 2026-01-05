@@ -9,7 +9,7 @@ import markedFootnote from "marked-footnote";
 import os from "os";
 
 import path from "path";
-import { BlueskyImageSchema, NowPageSchema, ObsidianDreamSchema, ObsidianPageSchema, ObsidianPostSchema, ObsidianWildflowerSchema } from "./schemas";
+import { BlueskyImageSchema, NowPageSchema, ObsidianDreamSchema, ObsidianPageSchema, ObsidianPostSchema } from "./schemas";
 
 const CACHE_DURATION = 5 * 60 * 60 * 1000; // hours in milliseconds
 const BLUESKY_IMAGES_CACHE_FILE_PATH = path.join(os.tmpdir(), "AstroBlog__BlueskyImagesCache.json");
@@ -234,13 +234,26 @@ const obsidianPublishedPosts = defineCollection({
     console.log(">> Loading Obsidian Published Posts data");
     const now = new Date();
 
-    const posts = (await loadDataPostsInFolder("Blog/Published", true))
+    const regularPosts = (await loadDataPostsInFolder("Blog/Published", true))
       .filter((post) => post.publishedAt <= now)
       .map((post) => {
         post.tags ||= [];
         post.metaImage ||= `https://meadow.cafe/open-graph/blog--${post.slug}.png`;
         return post;
-      })
+      });
+
+    // Load vomits and merge them into posts with a "vomit" tag
+    const vomitPosts = (await loadDataPostsInFolder("Blog/Vomits", true))
+      .filter((vomit) => !vomit.filename.startsWith("_")) // ignore drafts
+      .filter((vomit) => vomit.publishedAt) // only include those with publishedAt
+      .filter((vomit) => vomit.publishedAt <= now) // only include published ones
+      .map((vomit) => {
+        vomit.tags = ["wordvomit"];
+        vomit.metaImage ||= `https://meadow.cafe/open-graph/blog--${vomit.slug}.png`;
+        return vomit;
+      });
+
+    const posts = [...regularPosts, ...vomitPosts]
       .sort((a, b) => b.publishedAt.getTime() - a.publishedAt.getTime());
 
     // check that all slugs are unique
@@ -304,20 +317,6 @@ const obsidianPublishedDreams = defineCollection({
       .filter((dream) => dream.publishedAt);
 
     return dreamsInFolder;
-  },
-});
-
-const obsidianPublishedWildflowers = defineCollection({
-  schema: ObsidianWildflowerSchema,
-  loader: async () => {
-    console.log(">> Loading Obsidian Published Wildflowers data");
-    const wildflowersInFolder = (await loadDataPostsInFolder("Blog/Vomits", false))
-      // ignore files starting with underscore (drafts)
-      .filter((wildflower) => !wildflower.filename.startsWith("_"))
-      // only include wildflowers that have a publishedAt date
-      .filter((wildflower) => wildflower.publishedAt);
-
-    return wildflowersInFolder;
   },
 });
 
@@ -502,6 +501,5 @@ export const collections = {
   obsidianPublishedPosts,
   obsidianPublishedPages,
   obsidianPublishedDreams,
-  obsidianPublishedWildflowers,
   historicalNowPages,
 };
