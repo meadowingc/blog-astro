@@ -91,16 +91,17 @@ const { post, nextPost, prevPost, randomPost } = Astro.props;
   </style>
 
   <article class="h-entry">
-    <h1 class="p-name">{post.title}</h1>
-    {
-      post.subtitle && (
-        <p class="subtitle">
-          <em>{post.subtitle}</em>
-        </p>
-      )
-    }
-    <p>
-      <i>
+    <header class="post-header">
+      <h1 class="p-name">{post.title}</h1>
+      {
+        post.subtitle && (
+          <p class="subtitle">
+            <em>{post.subtitle}</em>
+          </p>
+        )
+      }
+
+      <span class="published-date">
         <time class="dt-published" datetime={post.publishedAt.toISOString()}>
           {
             post.publishedAt.toLocaleDateString("en-US", {
@@ -111,12 +112,12 @@ const { post, nextPost, prevPost, randomPost } = Astro.props;
             })
           }
         </time>
-      </i>
-    </p>
+      </span>
+    </header>
 
     {post.audioVersion && <AudioPlayer audioSrc={post.audioVersion} title={post.title} />}
 
-    <div class="e-content p-name" set:html={post.body} />
+    <div class="e-content p-name post-content" set:html={post.body} />
 
     <!-- <button class="tinylytics_kudos" data-private="true"> </button> -->
 
@@ -160,10 +161,31 @@ const { post, nextPost, prevPost, randomPost } = Astro.props;
 </Layout>
 
 <style>
+  h1 {
+    margin-bottom: 0.5rem;
+  }
+
   .subtitle {
     color: #999;
     font-size: 1.1em;
-    margin: 0.5rem 0 1rem 0;
+    margin: 0.5rem 0 1rem;
+  }
+
+  .published-date {
+    font-size: 0.85em;
+    color: #777;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .post-header {
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px dashed rgba(136, 136, 136, 0.3);
+  }
+
+  .post-content {
+    line-height: 1.7;
   }
 
   .tag-link {
