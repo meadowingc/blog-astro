@@ -47,6 +47,7 @@ export const ObsidianPageSchema = z.object({
   slug: z.string(),
   filename: z.string(),
   body: z.string(),
+  description: z.string().optional(),
   metaDescription: z.string().optional(),
   metaImage: z.string().optional(),
 });

@@ -1,0 +1,64 @@
+---
+import { getCollection } from "astro:content";
+import Layout from "../../layouts/Layout.astro";
+
+const slashPages = (await getCollection("obsidianPublishedPages"))
+  .map((col) => col.data)
+  .sort((a, b) => a.title.localeCompare(b.title));
+---
+
+<Layout
+  pageTitle="Slash Pages"
+  openGraph={{
+    title: "Slash Pages",
+    description: "A collection of minor pages that don't quite fit in the navbar.",
+    url: "https://meadow.cafe/slash",
+    type: "website",
+  }}
+>
+  <h1>/slash</h1>
+
+  <p>
+    These are my <a href="https://slashpages.net/">"slash pages"</a>, as well as other general pages that I want to add to my site
+    but don't really fit into the main navigation links.
+  </p>
+
+  {
+    slashPages.length === 0 ? (
+      <p>
+        <em>No slash pages yet. Check back soon!</em>
+      </p>
+    ) : (
+      <ul class="slash-list">
+        {slashPages.map((page) => (
+          <li>
+            <a href={`/${page.slug}`}>/{page.slug}</a>
+            {page.description && <span class="description"> — {page.description}</span>}
+          </li>
+        ))}
+      </ul>
+    )
+  }
+</Layout>
+
+<style>
+  .slash-list {
+    list-style: none;
+    padding: 0;
+    margin: 2rem 0;
+  }
+
+  .slash-list li {
+    margin-bottom: 0.5rem;
+    line-height: 1.5;
+  }
+
+  .slash-list a {
+    font-family: monospace;
+    font-size: 1.1em;
+  }
+
+  .description {
+    color: #666;
+  }
+</style>
