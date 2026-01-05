@@ -8,10 +8,16 @@ interface Props {
 
 const { entries, weeks = 52 } = Astro.props;
 
+// Helper to get a consistent date string in the local timezone (America/Costa_Rica)
+// This avoids timezone issues where toISOString() would shift dates to UTC
+function getLocalDateStr(date: Date): string {
+  return date.toLocaleDateString("en-CA", { timeZone: "America/Costa_Rica" }); // en-CA gives YYYY-MM-DD format
+}
+
 // Create a map of date strings to total word counts
 const dateWordMap = new Map<string, number>();
 entries.forEach(({ date, wordCount }) => {
-  const dateStr = date.toISOString().split("T")[0];
+  const dateStr = getLocalDateStr(date);
   dateWordMap.set(dateStr, (dateWordMap.get(dateStr) || 0) + wordCount);
 });
 
@@ -30,7 +36,7 @@ const days: { date: Date; wordCount: number; dateStr: string }[] = [];
 const currentDate = new Date(startDate);
 
 while (currentDate <= today) {
-  const dateStr = currentDate.toISOString().split("T")[0];
+  const dateStr = getLocalDateStr(currentDate);
   days.push({
     date: new Date(currentDate),
     wordCount: dateWordMap.get(dateStr) || 0,
