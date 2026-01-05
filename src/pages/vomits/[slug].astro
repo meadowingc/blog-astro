@@ -2,10 +2,15 @@
 import { getCollection } from "astro:content";
 import type { ObsidianPost } from "../../schemas";
 
+// Only generate redirects for posts before this URL structure was deprecated
+// Posts after this date were never published at /vomits/
+const REDIRECT_CUTOFF = new Date("2026-01-05T19:00:00Z");
+
 export async function getStaticPaths() {
   return (await getCollection("obsidianPublishedPosts"))
     .map((col) => col.data)
     .filter((post) => post.tags.includes("wordvomit"))
+    .filter((post) => post.publishedAt < REDIRECT_CUTOFF)
     .map((post) => {
       return {
         params: { slug: `${post.slug}` },
