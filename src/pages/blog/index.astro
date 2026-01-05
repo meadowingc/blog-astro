@@ -1,6 +1,7 @@
 ---
 import { getCollection } from "astro:content";
 import Layout from "../../layouts/Layout.astro";
+import WritingHeatmap from "../../components/WritingHeatmap.astro";
 
 const allPosts = (await getCollection("obsidianPublishedPosts"))
   .map((col) => col.data)
@@ -8,6 +9,12 @@ const allPosts = (await getCollection("obsidianPublishedPosts"))
 
 const recentPosts = allPosts.slice(0, 10);
 const favoritePosts = allPosts.filter((post) => post.isFavorite);
+
+// Calculate word counts for the heatmap
+const postEntries = allPosts.map((post) => ({
+  date: post.publishedAt,
+  wordCount: post.body.split(/\s+/).filter((word) => word.length > 0).length,
+}));
 ---
 
 <style>
@@ -20,6 +27,8 @@ const favoritePosts = allPosts.filter((post) => post.isFavorite);
 
 <Layout pageTitle={"Blog"}>
   <h1 id="blog">Blog</h1>
+
+  <WritingHeatmap entries={postEntries} weeks={37} />
 
   <p>
     For all my blog posts, please see the archive page <a href="/blog/archive">here</a>.

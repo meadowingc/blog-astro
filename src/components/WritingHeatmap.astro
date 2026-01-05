@@ -1,0 +1,379 @@
+---
+interface Props {
+  /** Array of entries with date and word count */
+  entries: { date: Date; wordCount: number }[];
+  /** Number of weeks to show (default: 52 for a full year) */
+  weeks?: number;
+}
+
+const { entries, weeks = 52 } = Astro.props;
+
+// Create a map of date strings to total word counts
+const dateWordMap = new Map<string, number>();
+entries.forEach(({ date, wordCount }) => {
+  const dateStr = date.toISOString().split("T")[0];
+  dateWordMap.set(dateStr, (dateWordMap.get(dateStr) || 0) + wordCount);
+});
+
+// Generate the grid data for the heatmap
+// Start from today and go back `weeks` weeks
+const today = new Date();
+const startDate = new Date(today);
+startDate.setDate(startDate.getDate() - (weeks * 7 - 1));
+
+// Adjust to start on Sunday
+const dayOfWeek = startDate.getDay();
+startDate.setDate(startDate.getDate() - dayOfWeek);
+
+// Generate all days
+const days: { date: Date; wordCount: number; dateStr: string }[] = [];
+const currentDate = new Date(startDate);
+
+while (currentDate <= today) {
+  const dateStr = currentDate.toISOString().split("T")[0];
+  days.push({
+    date: new Date(currentDate),
+    wordCount: dateWordMap.get(dateStr) || 0,
+    dateStr,
+  });
+  currentDate.setDate(currentDate.getDate() + 1);
+}
+
+// Group by weeks (columns) - each week is Sunday to Saturday
+const weeksData: (typeof days)[] = [];
+for (let i = 0; i < days.length; i += 7) {
+  weeksData.push(days.slice(i, i + 7));
+}
+
+// Get month labels - find where the 1st of each month falls
+const monthLabels: { name: string; weekIndex: number }[] = [];
+const seenMonths = new Set<string>();
+
+days.forEach((day, dayIndex) => {
+  if (day.date.getDate() === 1) {
+    const monthKey = `${day.date.getFullYear()}-${day.date.getMonth()}`;
+    if (!seenMonths.has(monthKey)) {
+      seenMonths.add(monthKey);
+      const weekIndex = Math.floor(dayIndex / 7);
+      monthLabels.push({
+        name: day.date.toLocaleDateString("en-US", { month: "short" }),
+        weekIndex,
+      });
+    }
+  }
+});
+
+// Calculate total words in the period
+const totalWords = entries
+  .filter(({ date }) => date >= startDate && date <= today)
+  .reduce((sum, { wordCount }) => sum + wordCount, 0);
+
+// Find the max word count for any single day (for relative scaling)
+const maxWordCount = Math.max(...days.map((d) => d.wordCount), 1);
+
+// Get the intensity level (0-4) based on word count relative to max
+function getLevel(wordCount: number): number {
+  if (wordCount === 0) return 0;
+  const ratio = wordCount / maxWordCount;
+  if (ratio <= 0.25) return 1;
+  if (ratio <= 0.5) return 2;
+  if (ratio <= 0.75) return 3;
+  return 4;
+}
+
+// Format word count for display
+function formatWords(count: number): string {
+  if (count >= 1000) {
+    return `${(count / 1000).toFixed(1)}k`;
+  }
+  return count.toString();
+}
+
+const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+// Calculate the total width of the heatmap grid (for sizing the months bar)
+const gridWidth = weeksData.length * 15 - 3; // 15px per column, minus last gap
+---
+
+<style>
+  .heatmap-container {
+    margin: 1.5rem 0;
+  }
+
+  .heatmap-wrapper {
+    overflow-x: auto;
+    padding: 1rem 0;
+  }
+
+  .heatmap {
+    display: inline-flex;
+    gap: 3px;
+  }
+
+  .heatmap-column {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .heatmap-day {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+    background-color: #e8e0dc;
+  }
+
+  .heatmap-day[data-level="1"] {
+    background-color: #f5d4c0;
+  }
+
+  .heatmap-day[data-level="2"] {
+    background-color: #f4b690;
+  }
+
+  .heatmap-day[data-level="3"] {
+    background-color: #e8956a;
+  }
+
+  .heatmap-day[data-level="4"] {
+    background-color: #db7040;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .heatmap-day {
+      background-color: #3d3836;
+    }
+
+    .heatmap-day[data-level="1"] {
+      background-color: #5c4235;
+    }
+
+    .heatmap-day[data-level="2"] {
+      background-color: #8b5a3c;
+    }
+
+    .heatmap-day[data-level="3"] {
+      background-color: #c47a4a;
+    }
+
+    .heatmap-day[data-level="4"] {
+      background-color: #f4b690;
+    }
+  }
+
+  .heatmap-day[data-future="true"] {
+    background-color: transparent;
+    border: 1px dashed #ccc;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .heatmap-day[data-future="true"] {
+      border-color: #3d3836;
+    }
+  }
+
+  .heatmap-months {
+    position: relative;
+    height: 1.2em;
+    margin-bottom: 4px;
+    margin-left: 28px;
+    font-size: 0.75rem;
+    color: var(--text-color);
+    opacity: 0.7;
+  }
+
+  .heatmap-month {
+    position: absolute;
+    white-space: nowrap;
+  }
+
+  .heatmap-days-labels {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    margin-right: 4px;
+    font-size: 0.65rem;
+    color: var(--text-color);
+    opacity: 0.7;
+  }
+
+  .heatmap-days-labels span {
+    height: 12px;
+    line-height: 12px;
+  }
+
+  .heatmap-days-labels span:nth-child(even) {
+    visibility: hidden;
+  }
+
+  .heatmap-grid-wrapper {
+    display: flex;
+  }
+
+  .heatmap-legend {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 0.75rem;
+    font-size: 0.75rem;
+    color: var(--text-color);
+    opacity: 0.7;
+  }
+
+  .heatmap-legend-colors {
+    display: flex;
+    gap: 2px;
+    margin: 0 4px;
+  }
+
+  .heatmap-legend-box {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+    background-color: #e8e0dc;
+  }
+
+  .heatmap-legend-box[data-level="1"] {
+    background-color: #f5d4c0;
+  }
+
+  .heatmap-legend-box[data-level="2"] {
+    background-color: #f4b690;
+  }
+
+  .heatmap-legend-box[data-level="3"] {
+    background-color: #e8956a;
+  }
+
+  .heatmap-legend-box[data-level="4"] {
+    background-color: #db7040;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .heatmap-legend-box {
+      background-color: #3d3836;
+    }
+
+    .heatmap-legend-box[data-level="1"] {
+      background-color: #5c4235;
+    }
+
+    .heatmap-legend-box[data-level="2"] {
+      background-color: #8b5a3c;
+    }
+
+    .heatmap-legend-box[data-level="3"] {
+      background-color: #c47a4a;
+    }
+
+    .heatmap-legend-box[data-level="4"] {
+      background-color: #f4b690;
+    }
+  }
+
+  .heatmap-summary {
+    font-size: 0.875rem;
+    color: var(--text-color);
+    opacity: 0.8;
+    margin-bottom: 0.5rem;
+  }
+
+  /* Tooltip */
+  .heatmap-day {
+    position: relative;
+    cursor: pointer;
+  }
+
+  .heatmap-day::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--background-color);
+    color: var(--text-color);
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease;
+    z-index: 10;
+    border: 1px solid var(--link-color);
+  }
+
+  .heatmap-day:hover::after {
+    opacity: 1;
+  }
+</style>
+
+<div class="heatmap-container">
+  <p class="heatmap-summary">
+    {formatWords(totalWords)} words written in the last {weeks >= 52 ? "year" : `${Math.round(weeks / 4)} months`}
+  </p>
+
+  <div class="heatmap-wrapper">
+    <!-- Month labels -->
+    <div class="heatmap-months" style={`width: ${gridWidth}px`}>
+      {
+        monthLabels.map((label) => {
+          // 15px per column (12px cell + 3px gap)
+          const leftPos = label.weekIndex * 15;
+          return (
+            <span class="heatmap-month" style={`left: ${leftPos}px`}>
+              {label.name}
+            </span>
+          );
+        })
+      }
+    </div>
+
+    <div class="heatmap-grid-wrapper">
+      <!-- Day labels -->
+      <div class="heatmap-days-labels">
+        {dayNames.map((day) => <span>{day}</span>)}
+      </div>
+
+      <!-- Heatmap grid -->
+      <div class="heatmap">
+        {
+          weeksData.map((week) => (
+            <div class="heatmap-column">
+              {week.map((day) => {
+                const isFuture = day.date > today;
+                const tooltip = isFuture
+                  ? ""
+                  : `${formatWords(day.wordCount)} words on ${day.date.toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric",
+                    })}`;
+                return (
+                  <div
+                    class="heatmap-day"
+                    data-level={isFuture ? 0 : getLevel(day.wordCount)}
+                    data-future={isFuture}
+                    data-tooltip={tooltip}
+                  />
+                );
+              })}
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </div>
+
+  <div class="heatmap-legend">
+    <span>Less</span>
+    <div class="heatmap-legend-colors">
+      <div class="heatmap-legend-box" data-level="0"></div>
+      <div class="heatmap-legend-box" data-level="1"></div>
+      <div class="heatmap-legend-box" data-level="2"></div>
+      <div class="heatmap-legend-box" data-level="3"></div>
+      <div class="heatmap-legend-box" data-level="4"></div>
+    </div>
+    <span>More</span>
+  </div>
+</div>
