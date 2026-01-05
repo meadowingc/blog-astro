@@ -34,38 +34,22 @@ jobs:
           token: ${{ secrets.OBSIDIAN_ACCESS_TOKEN }}
           fetch-depth: 0
 
-      # list pwd and ls to debug
-      - name: List files in the repository
-        run: |
-          echo "----- Current directory -----"
-          pwd
-          echo "----- List files -----"
-          ls -a
-          echo "----- List files in blog-astro -----"
-          ls -a blog-astro
-          echo "----- List files in obsidian-brain -----"
-          ls -a obsidian-brain
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+          cache-dependency-path: blog-astro/package-lock.json
 
-      - name: Install deps
-        run: |
-          cd blog-astro
-          npm install
-          cd ..
+      - name: Install dependencies
+        run: npm ci
+        working-directory: blog-astro
 
       - name: Build the site
         uses: withastro/action@v2
         with:
           path: ./blog-astro
-          # path: . # The root location of your Astro project inside the repository. (optional)
-          # node-version: 20 # The specific version of Node that should be used to build your site. Defaults to 20. (optional)
-          # package-manager: pnpm@latest # The Node package manager that should be used to install dependencies and build your site. Automatically detected based on your lockfile. (optional)
 
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-
-      - name: Fire webmentions
-        run: |
-          cd blog-astro
-          npm run doWebmentions
-          cd ..

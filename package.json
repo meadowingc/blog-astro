@@ -6,7 +6,6 @@
     "dev": "astro dev",
     "start": "astro dev",
     "build": "astro check && astro build",
-    "doWebmentions": "webmention dist/feed.xml --limit 50 --send",
     "preview": "astro preview",
     "astro": "astro",
     "upgrade": "npx @astrojs/upgrade"
