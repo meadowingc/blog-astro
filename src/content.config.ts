@@ -167,7 +167,7 @@ async function loadDataPostsInFolder(
       // wallback title
       frontMatter.title ||= file.replace(/\.md$/, "");
 
-      if (needsPublishedDate) {
+      if (needsPublishedDate || frontMatter.publishedAt) {
         if (!frontMatter.publishedAt) {
           throw new Error(`Item '${file}' does not have a publishedAt date!`);
         }
