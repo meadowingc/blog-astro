@@ -243,7 +243,7 @@ const obsidianPublishedPosts = defineCollection({
       });
 
     // Load vomits and merge them into posts with a "vomit" tag
-    const vomitPosts = (await loadDataPostsInFolder("Blog/Vomits", true))
+    const vomitPosts = (await loadDataPostsInFolder("Blog/Vomits", false))
       .filter((vomit) => !vomit.filename.startsWith("_")) // ignore drafts
       .filter((vomit) => vomit.publishedAt) // only include those with publishedAt
       .filter((vomit) => vomit.publishedAt <= now) // only include published ones
