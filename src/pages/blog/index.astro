@@ -7,7 +7,7 @@ const allPosts = (await getCollection("obsidianPublishedPosts"))
   .map((col) => col.data)
   .sort((a, b) => b.publishedAt.getTime() - a.publishedAt.getTime());
 
-const recentPosts = allPosts.slice(0, 10);
+const recentPosts = allPosts.slice(0, 20);
 const favoritePosts = allPosts.filter((post) => post.isFavorite);
 
 // Calculate word counts for the heatmap
