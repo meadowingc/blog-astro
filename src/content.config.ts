@@ -14,6 +14,41 @@ import { BacklinkEntrySchema, BlueskyImageSchema, NowPageSchema, ObsidianDreamSc
 const CACHE_DURATION = 5 * 60 * 60 * 1000; // hours in milliseconds
 const BLUESKY_IMAGES_CACHE_FILE_PATH = path.join(os.tmpdir(), "AstroBlog__BlueskyImagesCache.json");
 
+const BLUESKY_MAX_RETRIES = 3;
+const BLUESKY_INITIAL_DELAY_MS = 1000;
+
+/**
+ * Retry wrapper with exponential backoff for async operations.
+ */
+async function withRetry<T>(
+  operation: () => Promise<T>,
+  operationName: string,
+  maxRetries = BLUESKY_MAX_RETRIES,
+  initialDelayMs = BLUESKY_INITIAL_DELAY_MS
+): Promise<T> {
+  let lastError: Error | undefined;
+
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      return await operation();
+    } catch (error) {
+      lastError = error as Error;
+      const isLastAttempt = attempt === maxRetries;
+
+      if (isLastAttempt) {
+        console.error(`${operationName} failed after ${maxRetries} attempts:`, lastError.message);
+        throw lastError;
+      }
+
+      const delayMs = initialDelayMs * Math.pow(2, attempt - 1);
+      console.warn(`${operationName} attempt ${attempt}/${maxRetries} failed: ${lastError.message}. Retrying in ${delayMs}ms...`);
+      await new Promise(resolve => setTimeout(resolve, delayMs));
+    }
+  }
+
+  throw lastError;
+}
+
 // Load all attachments from Obsidian folder _attachments
 const baseObsidianPath = path.resolve("../obsidian-brain/Brian/");
 const attachmentsFolderPath = path.join(baseObsidianPath, "_attachments");
@@ -347,18 +382,24 @@ const blueskyImages = defineCollection({
       service: "https://public.api.bsky.app",
     });
 
-    const { data: profileData } = await agent.getProfile({ actor: "meadow.cafe" });
+    const { data: profileData } = await withRetry(
+      () => agent.getProfile({ actor: "meadow.cafe" }),
+      "Bluesky getProfile"
+    );
 
     const allPosts: any[] = [];
     let cursor: string | undefined = undefined;
     let hasMore = true;
     while (hasMore) {
-      const { data: postsData } = await agent.getAuthorFeed({
-        actor: profileData.did,
-        filter: "posts_with_media",
-        limit: 100,
-        cursor: cursor,
-      });
+      const { data: postsData } = await withRetry(
+        () => agent.getAuthorFeed({
+          actor: profileData.did,
+          filter: "posts_with_media",
+          limit: 100,
+          cursor: cursor,
+        }),
+        "Bluesky getAuthorFeed"
+      );
 
       allPosts.push(...postsData.feed.map((f) => f.post));
 
