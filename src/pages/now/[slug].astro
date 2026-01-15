@@ -1,26 +1,32 @@
 ---
 import { getCollection } from "astro:content";
+import Backlinks from "../../components/Backlinks.astro";
 import Layout from "../../layouts/Layout.astro";
 import type { NowPage } from "../../schemas";
+import { getBacklinksForPage, type Backlink } from "../../utils/backlinks";
 
 export async function getStaticPaths() {
-  const allNowPages = (await getCollection("historicalNowPages"))
+  const sortedNowPages = (await getCollection("historicalNowPages"))
     .map((col) => col.data)
     .sort((a, b) => b.date.getTime() - a.date.getTime());
 
-  return allNowPages.map((nowPage) => {
-    return {
-      params: { slug: nowPage.slug },
-      props: { nowPage },
-    };
-  });
+  return await Promise.all(
+    sortedNowPages.map(async (nowPage) => {
+      const backlinks = await getBacklinksForPage(`/now/${nowPage.slug}`);
+      return {
+        params: { slug: nowPage.slug },
+        props: { nowPage, backlinks },
+      };
+    }),
+  );
 }
 
 interface Props {
   nowPage: NowPage;
+  backlinks: Backlink[];
 }
 
-const { nowPage } = Astro.props;
+const { nowPage, backlinks } = Astro.props;
 ---
 
 <Layout
@@ -48,6 +54,8 @@ const { nowPage } = Astro.props;
     <a hidden rel="author" class="p-author h-card" href="https://meadow.cafe">Meadow</a>
     <link class="u-url" href={`https://meadow.cafe/now/${nowPage.slug}`} />
     <a hidden rel="me" href="https://c.im/@meadow">Mastodon</a>
+
+    <Backlinks backlinks={backlinks} />
   </article>
 </Layout>
 

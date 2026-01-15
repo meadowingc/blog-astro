@@ -1,33 +1,41 @@
 ---
 import { getCollection } from "astro:content";
-import Layout from "../../layouts/Layout.astro";
 import AudioPlayer from "../../components/AudioPlayer.astro";
+import Backlinks from "../../components/Backlinks.astro";
+import Layout from "../../layouts/Layout.astro";
 import type { ObsidianPost } from "../../schemas";
+import { getBacklinksForPage, type Backlink } from "../../utils/backlinks";
 
 export async function getStaticPaths() {
   const allPosts = (await getCollection("obsidianPublishedPosts"))
     .map((col) => col.data)
     .sort((a, b) => b.publishedAt.getTime() - a.publishedAt.getTime());
 
-  return allPosts.map((post, index) => {
-    // Get next and previous posts - previous is older, next is newer
-    const prevPost = index < allPosts.length - 1 ? allPosts[index + 1] : null;
-    const nextPost = index > 0 ? allPosts[index - 1] : null;
+  return await Promise.all(
+    allPosts.map(async (post, index) => {
+      // Get next and previous posts - previous is older, next is newer
+      const prevPost = index < allPosts.length - 1 ? allPosts[index + 1] : null;
+      const nextPost = index > 0 ? allPosts[index - 1] : null;
 
-    // Get a random post (excluding current)
-    const otherPosts = allPosts.filter((p) => p.slug !== post.slug);
-    const randomPost = otherPosts[Math.floor(Math.random() * otherPosts.length)];
+      // Get a random post (excluding current)
+      const otherPosts = allPosts.filter((p) => p.slug !== post.slug);
+      const randomPost = otherPosts[Math.floor(Math.random() * otherPosts.length)];
 
-    return {
-      params: { slug: `${post.slug}` },
-      props: {
-        post,
-        nextPost,
-        prevPost,
-        randomPost,
-      },
-    };
-  });
+      // Get backlinks for this post
+      const backlinks = await getBacklinksForPage(`/blog/${post.slug}`);
+
+      return {
+        params: { slug: `${post.slug}` },
+        props: {
+          post,
+          nextPost,
+          prevPost,
+          randomPost,
+          backlinks,
+        },
+      };
+    }),
+  );
 }
 
 interface Props {
@@ -35,9 +43,10 @@ interface Props {
   nextPost: ObsidianPost | null;
   prevPost: ObsidianPost | null;
   randomPost: ObsidianPost | null;
+  backlinks: Backlink[];
 }
 
-const { post, nextPost, prevPost, randomPost } = Astro.props;
+const { post, nextPost, prevPost, randomPost, backlinks } = Astro.props;
 
 // const webmentions = await fetch(`GET https://webmention.io/api/mentions.jf2?target=meadow.cafe&token=6IoMTGKsJgWRMdCK7ilXgw&per-page=1000`)
 //   .then((res) => res.json())
@@ -129,6 +138,8 @@ const { post, nextPost, prevPost, randomPost } = Astro.props;
     <a hidden rel="me" href="https://c.im/@meadow">Mastodon</a>
 
     <link class="u-url" href={`https://meadow.cafe/blog/${post.slug}`} />
+
+    <Backlinks backlinks={backlinks} />
 
     <nav class="post-navigation">
       <div class="post-nav-links">

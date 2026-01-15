@@ -6,6 +6,19 @@ export type ObsidianPage = z.infer<typeof ObsidianPageSchema>;
 export type ObsidianDream = z.infer<typeof ObsidianDreamSchema>;
 export type ObsidianWildflower = z.infer<typeof ObsidianWildflowerSchema>;
 export type NowPage = z.infer<typeof NowPageSchema>;
+export type BacklinkEntry = z.infer<typeof BacklinkEntrySchema>;
+
+export const BacklinkSchema = z.object({
+  slug: z.string(),
+  title: z.string(),
+  path: z.string(),
+  type: z.enum(["post", "dream", "page", "now"]),
+});
+
+export const BacklinkEntrySchema = z.object({
+  id: z.string(), // The page path this entry is for
+  backlinks: z.array(BacklinkSchema),
+});
 
 export const BlueskyImageSchema = z.object({
   id: z.string(),

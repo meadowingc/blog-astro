@@ -9,7 +9,7 @@ import markedFootnote from "marked-footnote";
 import os from "os";
 
 import path from "path";
-import { BlueskyImageSchema, NowPageSchema, ObsidianDreamSchema, ObsidianPageSchema, ObsidianPostSchema } from "./schemas";
+import { BacklinkEntrySchema, BlueskyImageSchema, NowPageSchema, ObsidianDreamSchema, ObsidianPageSchema, ObsidianPostSchema } from "./schemas";
 
 const CACHE_DURATION = 5 * 60 * 60 * 1000; // hours in milliseconds
 const BLUESKY_IMAGES_CACHE_FILE_PATH = path.join(os.tmpdir(), "AstroBlog__BlueskyImagesCache.json");
@@ -172,28 +172,33 @@ async function loadDataPostsInFolder(
           throw new Error(`Item '${file}' does not have a publishedAt date!`);
         }
 
-        frontMatter.publishedAt = frontMatter.publishedAt.trim().replace("−", "-");
+        // gray-matter may auto-parse some date formats to Date objects
+        if (frontMatter.publishedAt instanceof Date) {
+          // Already a Date, keep it as-is
+        } else {
+          const publishedAtStr = String(frontMatter.publishedAt).trim().replace("−", "-");
 
-        const dateWithOffset = frontMatter.publishedAt.substring(0, frontMatter.publishedAt.lastIndexOf(" "));
-        let zoneOffset = frontMatter.publishedAt.substring(frontMatter.publishedAt.lastIndexOf(" ") + 1).replace("GMT", "UTC");
+          const dateWithOffset = publishedAtStr.substring(0, publishedAtStr.lastIndexOf(" "));
+          let zoneOffset = publishedAtStr.substring(publishedAtStr.lastIndexOf(" ") + 1).replace("GMT", "UTC");
 
-        // Transform zoneOffset from -0600 to -6
-        const match = zoneOffset.match(/([+-])(\d{2})(\d{2})/);
-        if (match) {
-          const sign = match[1];
-          const hours = parseInt(match[2], 10);
-          zoneOffset = `UTC${sign}${hours}`;
+          // Transform zoneOffset from -0600 to -6
+          const match = zoneOffset.match(/([+-])(\d{2})(\d{2})/);
+          if (match) {
+            const sign = match[1];
+            const hours = parseInt(match[2], 10);
+            zoneOffset = `UTC${sign}${hours}`;
+          }
+
+          const parsedDate = DateTime.fromFormat(dateWithOffset, "yyyy-MM-dd HH:mm:ss", { zone: zoneOffset });
+
+          if (!parsedDate.isValid) {
+            throw new Error(
+              `Invalid PublishedDate format for post with title "${frontMatter.title}": "${publishedAtStr}"`,
+            );
+          }
+
+          frontMatter.publishedAt = parsedDate.toJSDate();
         }
-
-        const parsedDate = DateTime.fromFormat(dateWithOffset, "yyyy-MM-dd HH:mm:ss", { zone: zoneOffset });
-
-        if (!parsedDate.isValid) {
-          throw new Error(
-            `Invalid PublishedDate format for post with title "${frontMatter.title}": "${frontMatter.publishedAt}"`,
-          );
-        }
-
-        frontMatter.publishedAt = parsedDate.toJSDate();
       }
 
       if (!frontMatter.slug) {
@@ -494,6 +499,257 @@ const historicalNowPages = defineCollection({
   },
 });
 
+const SITE_BASE_URL = "https://meadow.cafe";
+
+/**
+ * Normalizes a URL to a relative path.
+ * Handles both absolute URLs (https://meadow.cafe/...) and relative paths (/...).
+ */
+function normalizeInternalLink(href: string): string | null {
+  if (!href || href.startsWith("#") || href.startsWith("javascript:") || href.startsWith("mailto:")) {
+    return null;
+  }
+
+  // Handle absolute URLs to our site - strip the domain
+  if (href.startsWith(SITE_BASE_URL)) {
+    return href.slice(SITE_BASE_URL.length) || "/";
+  }
+
+  // Handle relative paths
+  if (href.startsWith("/")) {
+    return href;
+  }
+
+  // External link
+  return null;
+}
+
+/**
+ * Extracts all internal links from HTML content.
+ */
+function extractInternalLinks(html: string): string[] {
+  const dom = new JSDOM(`<body>${html}</body>`);
+  const document = dom.window.document;
+  const links = document.querySelectorAll("a[href]");
+
+  const internalPaths = new Set<string>();
+
+  for (const link of links) {
+    const href = link.getAttribute("href");
+    if (!href) continue;
+
+    const normalizedPath = normalizeInternalLink(href);
+    if (normalizedPath) {
+      // Remove trailing slash for consistency (except for root)
+      const cleanPath = normalizedPath === "/" ? "/" : normalizedPath.replace(/\/$/, "");
+      internalPaths.add(cleanPath);
+    }
+  }
+
+  return Array.from(internalPaths);
+}
+
+interface LinkablePage {
+  slug: string;
+  title: string;
+  path: string;
+  body: string;
+  type: "post" | "dream" | "page" | "now";
+}
+
+interface Backlink {
+  slug: string;
+  title: string;
+  path: string;
+  type: "post" | "dream" | "page" | "now";
+}
+
+/**
+ * Builds backlinks by analyzing all pages and finding which pages link to each other.
+ */
+function buildBacklinksMap(pages: LinkablePage[]): Map<string, Backlink[]> {
+  const backlinksMap = new Map<string, Backlink[]>();
+
+  // Initialize empty arrays for all pages
+  for (const page of pages) {
+    const cleanPath = page.path === "/" ? "/" : page.path.replace(/\/$/, "");
+    backlinksMap.set(cleanPath, []);
+  }
+
+  // For each page, find what it links to and add backlinks
+  for (const sourcePage of pages) {
+    const linksInPage = extractInternalLinks(sourcePage.body);
+
+    for (const linkPath of linksInPage) {
+      // Find the target page
+      const targetPage = pages.find((p) => {
+        const cleanLinkPath = linkPath === "/" ? "/" : linkPath.replace(/\/$/, "");
+        const cleanPagePath = p.path === "/" ? "/" : p.path.replace(/\/$/, "");
+        return cleanLinkPath === cleanPagePath;
+      });
+
+      if (targetPage && targetPage.path !== sourcePage.path) {
+        const targetKey = targetPage.path === "/" ? "/" : targetPage.path.replace(/\/$/, "");
+        const backlinks = backlinksMap.get(targetKey) || [];
+
+        // Check if this backlink already exists
+        const exists = backlinks.some((bl) => bl.path === sourcePage.path);
+        if (!exists) {
+          backlinks.push({
+            slug: sourcePage.slug,
+            title: sourcePage.title,
+            path: sourcePage.path,
+            type: sourcePage.type,
+          });
+        }
+
+        backlinksMap.set(targetKey, backlinks);
+      }
+    }
+  }
+
+  return backlinksMap;
+}
+
+// Store loaded data to share between collections
+let cachedPosts: any[] | null = null;
+let cachedDreams: any[] | null = null;
+let cachedPages: any[] | null = null;
+let cachedNowPages: any[] | null = null;
+
+const backlinks = defineCollection({
+  schema: BacklinkEntrySchema,
+  loader: async () => {
+    console.log(">> Computing Backlinks");
+
+    // Load all content (reuse cached data if available from other collections)
+    const now = new Date();
+
+    // Load posts
+    if (!cachedPosts) {
+      const regularPosts = (await loadDataPostsInFolder("Blog/Published", true))
+        .filter((post) => post.publishedAt <= now)
+        .map((post) => {
+          post.tags ||= [];
+          post.metaImage ||= `https://meadow.cafe/open-graph/blog--${post.slug}.png`;
+          return post;
+        });
+
+      const vomitPosts = (await loadDataPostsInFolder("Blog/Vomits", false))
+        .filter((vomit) => !vomit.filename.startsWith("_"))
+        .filter((vomit) => vomit.publishedAt)
+        .filter((vomit) => vomit.publishedAt <= now)
+        .map((vomit) => {
+          vomit.tags = ["wordvomit"];
+          vomit.metaImage ||= `https://meadow.cafe/open-graph/blog--${vomit.slug}.png`;
+          return vomit;
+        });
+
+      cachedPosts = [...regularPosts, ...vomitPosts];
+    }
+
+    // Load dreams
+    if (!cachedDreams) {
+      cachedDreams = (await loadDataPostsInFolder("Blog/Dreams", false))
+        .filter((dream) => dream.publishedAt);
+    }
+
+    // Load pages
+    if (!cachedPages) {
+      cachedPages = await loadDataPostsInFolder("Blog/Pages", false);
+    }
+
+    // Load now pages
+    if (!cachedNowPages) {
+      const nowFolderPath = path.join(baseObsidianPath, "Blog/Pages/Now");
+      const markedParser = new Marked().use(markedFootnote());
+      try {
+        const files = fs.readdirSync(nowFolderPath)
+          .filter(file => file.endsWith('.md') && /^\d{4}-\d{2}-\d{2}\.md$/.test(file));
+
+        cachedNowPages = [];
+        for (const file of files) {
+          try {
+            const filePath = path.join(nowFolderPath, file);
+            const content = fs.readFileSync(filePath, 'utf-8');
+            const grayMatterParsed = matter.default(content);
+
+            let body = markedParser.parse(grayMatterParsed.content);
+            if (body instanceof Promise) {
+              body = await body;
+            }
+
+            const slug = file.replace('.md', '');
+            const [year, month, day] = slug.split('-').map(Number);
+            const parsedDate = new Date(year, month - 1, day);
+
+            cachedNowPages.push({
+              id: slug,
+              title: `Now (${parsedDate.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric", timeZone: "America/Costa_Rica" })})`,
+              slug,
+              date: parsedDate,
+              body,
+            });
+          } catch (error) {
+            console.warn(`Failed to process now page ${file}:`, (error as Error).message);
+          }
+        }
+      } catch (error) {
+        console.warn("Failed to load now pages for backlinks:", (error as Error).message);
+        cachedNowPages = [];
+      }
+    }
+
+    // Build linkable pages array
+    const linkablePages: LinkablePage[] = [
+      ...cachedPosts.map((p) => ({
+        slug: p.slug,
+        title: p.title,
+        path: `/blog/${p.slug}`,
+        body: p.body,
+        type: "post" as const,
+      })),
+      ...cachedDreams.map((d) => ({
+        slug: d.slug,
+        title: d.title,
+        path: `/dreams/${d.slug}`,
+        body: d.body,
+        type: "dream" as const,
+      })),
+      ...cachedPages.map((p) => ({
+        slug: p.slug,
+        title: p.title,
+        path: `/${p.slug}`,
+        body: p.body,
+        type: "page" as const,
+      })),
+      ...cachedNowPages.map((n) => ({
+        slug: n.slug,
+        title: n.title,
+        path: `/now/${n.slug}`,
+        body: n.body,
+        type: "now" as const,
+      })),
+    ];
+
+    // Build backlinks map
+    const backlinksMap = buildBacklinksMap(linkablePages);
+
+    // Convert map to collection entries
+    const entries: Array<{ id: string; backlinks: Backlink[] }> = [];
+    for (const [pagePath, pageBacklinks] of backlinksMap) {
+      entries.push({
+        id: pagePath,
+        backlinks: pageBacklinks,
+      });
+    }
+
+    console.log(`Computed backlinks for ${entries.length} pages`);
+
+    return entries;
+  },
+});
+
 export const collections = {
   // 'blog': blogCollection,
   // 'newsletter': newsletter,
@@ -503,4 +759,5 @@ export const collections = {
   obsidianPublishedPages,
   obsidianPublishedDreams,
   historicalNowPages,
+  backlinks,
 };

@@ -1,26 +1,32 @@
 ---
 import { getCollection } from "astro:content";
 import Layout from "../layouts/Layout.astro";
-import type { ObsidianPost } from "../schemas";
+import type { ObsidianPage } from "../schemas";
+import { getBacklinksForPage, type Backlink } from "../utils/backlinks";
 
 export async function getStaticPaths() {
-  return (await getCollection("obsidianPublishedPages"))
-    .map((col) => col.data)
-    .map((page) => {
+  const allPages = (await getCollection("obsidianPublishedPages")).map((col) => col.data);
+
+  return await Promise.all(
+    allPages.map(async (page) => {
+      const backlinks = await getBacklinksForPage(`/${page.slug}`);
       return {
         params: { slug: `${page.slug}` },
-        props: { page: page },
+        props: { page, backlinks },
       };
-    });
+    }),
+  );
 }
 
 interface Props {
-  page: ObsidianPost;
+  page: ObsidianPage;
+  backlinks: Backlink[];
 }
 
-const { page } = Astro.props;
+const { page, backlinks } = Astro.props;
 ---
 
 <Layout pageTitle={page.title}>
   <article set:html={page.body} />
+  <!-- <Backlinks backlinks={backlinks} /> -->
 </Layout>

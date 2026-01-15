@@ -1,0 +1,103 @@
+---
+import type { Backlink } from "../utils/backlinks";
+
+interface Props {
+  backlinks: Backlink[];
+}
+
+const { backlinks } = Astro.props;
+
+// Sort backlinks by type for nice grouping, then by title
+const sortedBacklinks = [...backlinks].sort((a, b) => {
+  const typeOrder = { post: 0, dream: 1, now: 2, page: 3 };
+  const typeCompare = typeOrder[a.type] - typeOrder[b.type];
+  if (typeCompare !== 0) return typeCompare;
+  return a.title.localeCompare(b.title);
+});
+---
+
+{
+  sortedBacklinks.length > 0 && (
+    <aside class="backlinks">
+      <h3>Backlinks</h3>
+      <ul>
+        {sortedBacklinks.map((backlink) => (
+          <li>
+            <a href={backlink.path}>{backlink.title}</a>
+            {backlink.type === "dream" && <span class="type-badge">dream</span>}
+            {backlink.type === "now" && <span class="type-badge">now</span>}
+          </li>
+        ))}
+      </ul>
+    </aside>
+  )
+}
+
+<style>
+  .backlinks {
+    margin-top: 3rem;
+    padding: 1.5rem;
+    background: rgba(0, 0, 0, 0.02);
+    border-radius: 8px;
+    border: 1px dashed rgba(136, 136, 136, 0.3);
+  }
+
+  .backlinks h3 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1rem;
+    color: #555;
+  }
+
+  .backlinks ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .backlinks li {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .backlinks a {
+    text-decoration: none;
+    padding: 0.25rem 0.5rem;
+    background: rgba(0, 0, 0, 0.04);
+    border-radius: 4px;
+    font-size: 0.9rem;
+    transition: background-color 0.2s;
+  }
+
+  .backlinks a:hover {
+    background: rgba(0, 0, 0, 0.08);
+    text-decoration: underline;
+  }
+
+  .type-badge {
+    font-size: 0.7rem;
+    color: #999;
+    font-style: italic;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .backlinks {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .backlinks h3 {
+      color: #aaa;
+    }
+
+    .backlinks a {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .backlinks a:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+  }
+</style>

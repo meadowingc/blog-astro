@@ -1,24 +1,30 @@
 ---
 import { getCollection } from "astro:content";
+import Backlinks from "../../components/Backlinks.astro";
 import Layout from "../../layouts/Layout.astro";
 import type { ObsidianDream } from "../../schemas";
+import { getBacklinksForPage, type Backlink } from "../../utils/backlinks";
 
 export async function getStaticPaths() {
-  return (await getCollection("obsidianPublishedDreams"))
-    .map((col) => col.data)
-    .map((dream) => {
+  const allDreams = (await getCollection("obsidianPublishedDreams")).map((col) => col.data);
+
+  return await Promise.all(
+    allDreams.map(async (dream) => {
+      const backlinks = await getBacklinksForPage(`/dreams/${dream.slug}`);
       return {
         params: { slug: `${dream.slug}` },
-        props: { dream },
+        props: { dream, backlinks },
       };
-    });
+    }),
+  );
 }
 
 interface Props {
   dream: ObsidianDream;
+  backlinks: Backlink[];
 }
 
-const { dream } = Astro.props;
+const { dream, backlinks } = Astro.props;
 ---
 
 <Layout
@@ -63,6 +69,8 @@ const { dream } = Astro.props;
     <a hidden rel="author" class="p-author h-card" href="https://meadow.cafe">Meadow</a>
     <link class="u-url" href={`https://meadow.cafe/dreams/${dream.slug}`} />
     <a hidden rel="me" href="https://c.im/@meadow">Mastodon</a>
+
+    <Backlinks backlinks={backlinks} />
   </article>
 </Layout>
 
