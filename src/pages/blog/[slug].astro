@@ -77,6 +77,21 @@ const { post, nextPost, prevPost, randomPost, backlinks } = Astro.props;
     background-color: #f0fdf4;
     border-color: #86efac;
   }
+
+  @media (prefers-color-scheme: dark) {
+    .mochi_kudos {
+      border-color: #555;
+    }
+
+    .mochi_kudos:hover {
+      background-color: rgba(255, 255, 255, 0.08);
+    }
+
+    .mochi_kudos.did_kudo {
+      background-color: rgba(134, 239, 172, 0.1);
+      border-color: rgba(134, 239, 172, 0.4);
+    }
+  }
 </style>
 
 <Layout
