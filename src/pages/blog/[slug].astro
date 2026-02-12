@@ -56,25 +56,26 @@ const { post, nextPost, prevPost, randomPost, backlinks } = Astro.props;
 ---
 
 <style>
-  .tinylytics_kudos {
-    padding: 0;
-    margin: 0;
-    border: 0;
+  .mochi_kudos {
+    padding: 0.4em 0.8em;
+    border: 1px solid #ccc;
+    border-radius: 0.5em;
     background-color: inherit;
     color: inherit;
-    font-size: 1.3em;
-  }
-
-  .tinylytics_kudos:hover {
+    font-size: 1em;
     cursor: pointer;
+    transition:
+      background-color 0.2s,
+      border-color 0.2s;
   }
 
-  .tinylytics_kudos:before {
-    content: "👋";
+  .mochi_kudos:hover {
+    background-color: rgba(0, 0, 0, 0.05);
   }
 
-  .tinylytics_kudos.did_select:before {
-    content: "🥰";
+  .mochi_kudos.did_kudo {
+    background-color: #f0fdf4;
+    border-color: #86efac;
   }
 </style>
 
@@ -128,7 +129,7 @@ const { post, nextPost, prevPost, randomPost, backlinks } = Astro.props;
 
     <div class="e-content p-name post-content" set:html={post.body} />
 
-    <!-- <button class="tinylytics_kudos" data-private="true"> </button> -->
+    <button class="mochi_kudos"></button>
 
     <p>
       {post.tags.map((tag: string) => /* prettier-ignore */ <a class="tag-link p-category" href={`/tags/${tag}`}>#{tag}</a>)}
