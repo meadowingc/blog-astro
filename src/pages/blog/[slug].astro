@@ -144,7 +144,7 @@ const { post, nextPost, prevPost, randomPost, backlinks } = Astro.props;
 
     <div class="e-content p-name post-content" set:html={post.body} />
 
-    <button class="mochi_kudos"></button>
+    <button class="mochi_kudos" data-private="true"></button>
 
     <p>
       {post.tags.map((tag: string) => /* prettier-ignore */ <a class="tag-link p-category" href={`/tags/${tag}`}>#{tag}</a>)}
