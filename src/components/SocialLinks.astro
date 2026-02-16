@@ -1,0 +1,79 @@
+---
+interface Props {
+  blueskyUrl?: string;
+  mastodonUrl?: string;
+}
+
+const { blueskyUrl, mastodonUrl } = Astro.props;
+const hasLinks = blueskyUrl || mastodonUrl;
+---
+
+{
+  hasLinks && (
+    <aside class="social-links">
+      <span class="social-links-label">Follow up on</span>
+      {blueskyUrl && (
+        <a href={blueskyUrl} target="_blank" rel="noopener noreferrer" class="social-pill bluesky">
+          🔗 Bluesky
+        </a>
+      )}
+      {mastodonUrl && (
+        <a href={mastodonUrl} target="_blank" rel="noopener noreferrer" class="social-pill mastodon">
+          🔗 Mastodon
+        </a>
+      )}
+    </aside>
+  )
+}
+
+<style>
+  .social-links {
+    margin-top: 2rem;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .social-links-label {
+    font-size: 0.9rem;
+    color: #555;
+  }
+
+  .social-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    text-decoration: none;
+    padding: 0.25rem 0.6rem;
+    background: rgba(0, 0, 0, 0.04);
+    border-radius: 9999px;
+    font-size: 0.85rem;
+    transition:
+      background-color 0.2s,
+      transform 0.1s;
+  }
+
+  .social-pill:hover {
+    background: rgba(0, 0, 0, 0.08);
+    transform: translateY(-1px);
+  }
+
+  .social-pill:active {
+    transform: translateY(0);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .social-links-label {
+      color: #aaa;
+    }
+
+    .social-pill {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .social-pill:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+  }
+</style>

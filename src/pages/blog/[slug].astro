@@ -2,6 +2,7 @@
 import { getCollection } from "astro:content";
 import AudioPlayer from "../../components/AudioPlayer.astro";
 import Backlinks from "../../components/Backlinks.astro";
+import SocialLinks from "../../components/SocialLinks.astro";
 import Layout from "../../layouts/Layout.astro";
 import type { ObsidianPost } from "../../schemas";
 import { getBacklinksForPage, type Backlink } from "../../utils/backlinks";
@@ -154,6 +155,8 @@ const { post, nextPost, prevPost, randomPost, backlinks } = Astro.props;
     <a hidden rel="me" href="https://c.im/@meadow">Mastodon</a>
 
     <link class="u-url" href={`https://meadow.cafe/blog/${post.slug}`} />
+
+    <SocialLinks blueskyUrl={post.blueskyUrl} mastodonUrl={post.mastodonUrl} />
 
     <Backlinks backlinks={backlinks} />
 
