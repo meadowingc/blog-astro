@@ -25,7 +25,6 @@ const sortedBacklinks = [...backlinks].sort((a, b) => {
           <li>
             <a href={backlink.path}>{backlink.title}</a>
             {backlink.type === "dream" && <span class="type-badge">dream</span>}
-            {backlink.type === "now" && <span class="type-badge">now</span>}
           </li>
         ))}
       </ul>
