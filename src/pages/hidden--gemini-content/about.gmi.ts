@@ -14,7 +14,7 @@ export async function GET() {
   gemtext += `Something I would like to eventually start doing with this space is to get into the habit of writing short stories, but haven't managed to find a way to do it yet (writing posts/essays comes much easier)!\n\n`;
 
   gemtext += `## Contact\n\n`;
-  gemtext += `If for any reason you want to contact me you can reach me at meadowingc@proton.me\n\n`;
+  gemtext += `If for any reason you want to contact me you can reach me at hi@meadow.cafe\n\n`;
 
   gemtext += `## Other Spaces\n\n`;
   gemtext += `=> https://meadow.cafe/ My main website\n`;

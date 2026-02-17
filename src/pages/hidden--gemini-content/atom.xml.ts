@@ -40,22 +40,22 @@ export const GET: APIRoute = async () => {
   <updated>${latestUpdate}</updated>
   <author>
     <name>Meadow</name>
-    <email>meadowingc@proton.me</email>
+    <email>hi@meadow.cafe</email>
   </author>
   <generator uri="https://astro.build/" version="4.0">Astro</generator>
 ${allContent
-  .map((item) => {
-    const entryUrl = `${geminiBaseUrl}/${item.url}`;
+      .map((item) => {
+        const entryUrl = `${geminiBaseUrl}/${item.url}`;
 
-    return `  <entry>
+        return `  <entry>
     <title>${escapeXml(item.title)}</title>
     <link href="${entryUrl}" rel="alternate" type="text/gemini"/>
     <id>${entryUrl}</id>
     <published>${new Date(item.publishedAt).toISOString()}</published>
     <updated>${new Date(item.publishedAt).toISOString()}</updated>
   </entry>`;
-  })
-  .join("\n")}
+      })
+      .join("\n")}
 </feed>`;
 
   return new Response(xml, {

@@ -18,7 +18,7 @@ export async function GET() {
   );
 
   gemtext += `Welcome to my gemini space! This is a text-only version of my blog.\n\n`;
-  gemtext += `If for any reason you want to contact me you can reach me at meadowingc@proton.me\n\n`;
+  gemtext += `If for any reason you want to contact me you can reach me at hi@meadow.cafe\n\n`;
 
   // Navigation
   gemtext += `## Navigation\n\n`;
