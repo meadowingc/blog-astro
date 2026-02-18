@@ -1,4 +1,5 @@
 import { getCollection } from "astro:content";
+import { SITE_EMAIL } from "../../consts";
 import { createGeminiHeader, createGeminiFooter, formatGeminiDate } from "../../utils/gemini.js";
 
 export async function GET() {
@@ -18,7 +19,7 @@ export async function GET() {
   );
 
   gemtext += `Welcome to my gemini space! This is a text-only version of my blog.\n\n`;
-  gemtext += `If for any reason you want to contact me you can reach me at hi@meadow.cafe\n\n`;
+  gemtext += `If for any reason you want to contact me you can reach me at ${SITE_EMAIL}\n\n`;
 
   // Navigation
   gemtext += `## Navigation\n\n`;

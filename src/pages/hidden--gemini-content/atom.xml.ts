@@ -1,5 +1,6 @@
 import type { APIRoute } from "astro";
 import { getCollection } from "astro:content";
+import { SITE_EMAIL } from "../../consts";
 
 export const GET: APIRoute = async () => {
   const posts = (await getCollection("obsidianPublishedPosts")).map((col) => col.data);
@@ -40,7 +41,7 @@ export const GET: APIRoute = async () => {
   <updated>${latestUpdate}</updated>
   <author>
     <name>Meadow</name>
-    <email>hi@meadow.cafe</email>
+    <email>${SITE_EMAIL}</email>
   </author>
   <generator uri="https://astro.build/" version="4.0">Astro</generator>
 ${allContent

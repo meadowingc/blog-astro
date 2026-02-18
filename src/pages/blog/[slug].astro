@@ -156,7 +156,7 @@ const { post, nextPost, prevPost, randomPost, backlinks } = Astro.props;
 
     <link class="u-url" href={`https://meadow.cafe/blog/${post.slug}`} />
 
-    <SocialLinks blueskyUrl={post.blueskyUrl} mastodonUrl={post.mastodonUrl} />
+    <SocialLinks postTitle={post.title} blueskyUrl={post.blueskyUrl} mastodonUrl={post.mastodonUrl} />
 
     <Backlinks backlinks={backlinks} />
 

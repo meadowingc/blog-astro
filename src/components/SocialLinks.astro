@@ -1,30 +1,34 @@
 ---
+import { SITE_EMAIL } from "../consts";
+
 interface Props {
+  postTitle: string;
   blueskyUrl?: string;
   mastodonUrl?: string;
 }
 
-const { blueskyUrl, mastodonUrl } = Astro.props;
-const hasLinks = blueskyUrl || mastodonUrl;
+const { postTitle, blueskyUrl, mastodonUrl } = Astro.props;
+const mailtoUrl = `mailto:${SITE_EMAIL}?subject=${encodeURIComponent(`RE: ${postTitle}`)}`;
 ---
 
-{
-  hasLinks && (
-    <aside class="social-links">
-      <span class="social-links-label">Follow up on</span>
-      {blueskyUrl && (
-        <a href={blueskyUrl} target="_blank" rel="noopener noreferrer" class="social-pill bluesky">
-          🔗 Bluesky
-        </a>
-      )}
-      {mastodonUrl && (
-        <a href={mastodonUrl} target="_blank" rel="noopener noreferrer" class="social-pill mastodon">
-          🔗 Mastodon
-        </a>
-      )}
-    </aside>
-  )
-}
+<aside class="social-links">
+  <span class="social-links-label">Follow up on</span>
+  <a href={mailtoUrl} class="social-pill"> ✉️ Email </a>
+  {
+    blueskyUrl && (
+      <a href={blueskyUrl} target="_blank" rel="noopener noreferrer" class="social-pill">
+        🔗 Bluesky
+      </a>
+    )
+  }
+  {
+    mastodonUrl && (
+      <a href={mastodonUrl} target="_blank" rel="noopener noreferrer" class="social-pill">
+        🔗 Mastodon
+      </a>
+    )
+  }
+</aside>
 
 <style>
   .social-links {
