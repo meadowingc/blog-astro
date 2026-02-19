@@ -52,8 +52,8 @@ export const ObsidianPostSchema = z.object({
   metaDescription: z.string().optional(),
   metaImage: z.string().optional(),
   audioVersion: z.string().optional(),
-  blueskyUrl: z.preprocess((val) => (val === "" ? undefined : val), z.string().url().optional()),
-  mastodonUrl: z.preprocess((val) => (val === "" ? undefined : val), z.string().url().optional()),
+  blueskyUrl: z.preprocess((val) => (val === "" || val === null ? undefined : val), z.string().url().optional()),
+  mastodonUrl: z.preprocess((val) => (val === "" || val === null ? undefined : val), z.string().url().optional()),
 });
 
 export const ObsidianPageSchema = z.object({
