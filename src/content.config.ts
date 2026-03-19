@@ -53,7 +53,23 @@ async function withRetry<T>(
 const baseObsidianPath = path.resolve("../obsidian-brain/Brian/");
 const attachmentsFolderPath = path.join(baseObsidianPath, "_attachments");
 const publicImagesFolderPath = path.resolve("./public/obsidian_images");
-const publicAudioFolderPath = path.resolve("./public/obsidian_audio");
+
+// Load TTS audio manifest (maps post filename stems to remote audio URLs)
+const TTS_MANIFEST_URL = "https://post-audios.meadow.cafe/manifest.json";
+let _ttsAudioManifest: Record<string, { audioFile: string; audioUrl: string }> | null = null;
+
+async function getTtsAudioManifest(): Promise<Record<string, { audioFile: string; audioUrl: string }>> {
+  if (_ttsAudioManifest) return _ttsAudioManifest;
+  try {
+    const response = await fetch(TTS_MANIFEST_URL);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    _ttsAudioManifest = await response.json() as Record<string, { audioFile: string; audioUrl: string }>;
+  } catch (error) {
+    console.warn(`Failed to fetch TTS manifest from ${TTS_MANIFEST_URL}: ${(error as Error).message}`);
+    _ttsAudioManifest = {};
+  }
+  return _ttsAudioManifest;
+}
 
 // now put every filename in the allKnownAttachments array if the file is not a directory (or recurse)
 const allKnownAttachments: string[] = [];
@@ -83,18 +99,6 @@ function copyImageToPublicFolder(imagePath: string) {
   }
 
   fs.copyFileSync(imagePath, destinationPath);
-}
-
-function copyAudioToPublicFolder(audioPath: string) {
-  const audioName = path.basename(audioPath);
-  const destinationPath = path.join(publicAudioFolderPath, audioName);
-
-  if (!fs.existsSync(publicAudioFolderPath)) {
-    fs.mkdirSync(publicAudioFolderPath, { recursive: true });
-  }
-
-  fs.copyFileSync(audioPath, destinationPath);
-  return `/obsidian_audio/${audioName}`;
 }
 
 /**
@@ -166,6 +170,7 @@ async function loadDataPostsInFolder(
   console.log(`Found ${markdownFiles.length} markdown files under Obsidian folder: ${folderPath}`);
 
   const markedParser = new Marked().use(markedFootnote());
+  const ttsAudioManifest = await getTtsAudioManifest();
 
   return await Promise.all(
     markdownFiles.map(async (file) => {
@@ -247,16 +252,9 @@ async function loadDataPostsInFolder(
         frontMatter.slug = convertToSlug(frontMatter.title);
       }
 
-      // Handle audio version if specified in frontmatter
-      if (frontMatter.audioVersion) {
-        const audioPath = path.join(attachmentsFolderPath, "audio", frontMatter.audioVersion);
-        if (fs.existsSync(audioPath)) {
-          frontMatter.audioVersion = copyAudioToPublicFolder(audioPath);
-        } else {
-          console.warn(`Audio file not found: ${frontMatter.audioVersion} for post ${file}`);
-          frontMatter.audioVersion = undefined;
-        }
-      }
+      // Set audio version from TTS manifest
+      const ttsEntry = ttsAudioManifest[file.replace(/\.md$/, "")];
+      frontMatter.audioVersion = ttsEntry?.audioUrl || undefined;
 
       return {
         id: file,
