@@ -52,6 +52,7 @@ export const ObsidianPostSchema = z.object({
   metaDescription: z.string().optional(),
   metaImage: z.string().optional(),
   audioVersion: z.string().optional(),
+  audioFileSize: z.number().optional(),
   blueskyUrl: z.preprocess((val) => (val === "" || val === null ? undefined : val), z.string().url().optional()),
   mastodonUrl: z.preprocess((val) => (val === "" || val === null ? undefined : val), z.string().url().optional()),
 });
@@ -77,6 +78,7 @@ export const ObsidianDreamSchema = z.object({
   metaDescription: z.string().optional(),
   metaImage: z.string().optional(),
   audioVersion: z.string().optional(),
+  audioFileSize: z.number().optional(),
 });
 
 export const ObsidianWildflowerSchema = z.object({
@@ -90,6 +92,7 @@ export const ObsidianWildflowerSchema = z.object({
   metaDescription: z.string().optional(),
   metaImage: z.string().optional(),
   audioVersion: z.string().optional(),
+  audioFileSize: z.number().optional(),
 });
 
 export const NowPageSchema = z.object({

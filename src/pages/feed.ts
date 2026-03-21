@@ -1,6 +1,5 @@
 import rss from "@astrojs/rss";
 import { getCollection } from "astro:content";
-import fs from "fs";
 import path from "path";
 
 // this is a fallback feed for those people that were originally following me on
@@ -10,6 +9,8 @@ export async function GET({ site }) {
   const bearPosts = (await getCollection("obsidianPublishedPosts"))
     .map((col) => col.data)
     .sort((a, b) => b.publishedAt.getTime() - a.publishedAt.getTime());
+
+  const mimeTypes: Record<string, string> = { ".m4a": "audio/mp4", ".mp3": "audio/mpeg", ".wav": "audio/wav", ".ogg": "audio/ogg" };
 
   return rss({
     title: "Meadow",
@@ -24,20 +25,13 @@ export async function GET({ site }) {
         description: post.body,
       };
 
-      // Add audio enclosure if the post has an audio version
       if (post.audioVersion) {
-        try {
-          const audioPath = path.join(process.cwd(), "public", post.audioVersion.replace(/^\//, ""));
-          const stats = fs.statSync(audioPath);
-
-          item.enclosure = {
-            url: new URL(post.audioVersion, site).href,
-            length: stats.size,
-            type: "audio/wav",
-          };
-        } catch (error) {
-          console.warn(`Could not get file stats for audio: ${post.audioVersion}`, error);
-        }
+        const ext = path.extname(post.audioVersion).toLowerCase();
+        item.enclosure = {
+          url: post.audioVersion,
+          length: post.audioFileSize || 0,
+          type: mimeTypes[ext] || "audio/mp4",
+        };
       }
 
       return item;

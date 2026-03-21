@@ -1,6 +1,5 @@
 import rss from "@astrojs/rss";
 import { getCollection } from "astro:content";
-import fs from "fs";
 import path from "path";
 
 export async function GET({ site }) {
@@ -31,6 +30,8 @@ export async function GET({ site }) {
   const everything = [...posts, ...dreams, ...nowPages];
   everything.sort((a, b) => b.publishedAt.getTime() - a.publishedAt.getTime());
 
+  const mimeTypes: Record<string, string> = { ".m4a": "audio/mp4", ".mp3": "audio/mpeg", ".wav": "audio/wav", ".ogg": "audio/ogg" };
+
   return rss({
     title: "Meadow",
     description: "Wondering about life, the meaning of the universe, and everything.",
@@ -44,20 +45,14 @@ export async function GET({ site }) {
         description: thing.body,
       };
 
-      // Add audio enclosure if the post has an audio version (only posts have audio, not dreams)
       if ("audioVersion" in thing && thing.audioVersion && typeof thing.audioVersion === "string") {
-        try {
-          const audioPath = path.join(process.cwd(), "public", thing.audioVersion.replace(/^\//, ""));
-          const stats = fs.statSync(audioPath);
-
-          item.enclosure = {
-            url: new URL(thing.audioVersion, site).href,
-            length: stats.size,
-            type: "audio/wav",
-          };
-        } catch (error) {
-          console.warn(`Could not get file stats for audio: ${thing.audioVersion}`, error);
-        }
+        const ext = path.extname(thing.audioVersion).toLowerCase();
+        const fileSize = "audioFileSize" in thing && typeof thing.audioFileSize === "number" ? thing.audioFileSize : 0;
+        item.enclosure = {
+          url: thing.audioVersion,
+          length: fileSize,
+          type: mimeTypes[ext] || "audio/mp4",
+        };
       }
 
       return item;

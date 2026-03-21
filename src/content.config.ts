@@ -57,9 +57,10 @@ const publicImagesFolderPath = path.resolve("./public/obsidian_images");
 // Load TTS audio manifest (maps post filename stems to remote audio URLs)
 const TTS_MANIFEST_URL = "https://post-audios.meadow.cafe/manifest.json";
 const TTS_MANIFEST_LOCAL_PATH = path.resolve("tts-manifest.json");
-let _ttsAudioManifest: Record<string, { audioFile: string; audioUrl: string }> | null = null;
+type TtsManifestEntry = { audioFile: string; audioUrl: string; fileSize?: number };
+let _ttsAudioManifest: Record<string, TtsManifestEntry> | null = null;
 
-async function getTtsAudioManifest(): Promise<Record<string, { audioFile: string; audioUrl: string }>> {
+async function getTtsAudioManifest(): Promise<Record<string, TtsManifestEntry>> {
   if (_ttsAudioManifest) return _ttsAudioManifest;
 
   // Try local file first (e.g. pre-downloaded in CI to avoid Cloudflare bot blocking)
@@ -82,7 +83,7 @@ async function getTtsAudioManifest(): Promise<Record<string, { audioFile: string
       },
     });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    _ttsAudioManifest = await response.json() as Record<string, { audioFile: string; audioUrl: string }>;
+    _ttsAudioManifest = await response.json() as Record<string, TtsManifestEntry>;
     console.log(`Loaded TTS manifest from remote URL (${Object.keys(_ttsAudioManifest!).length} entries)`);
   } catch (error) {
     console.warn(`Failed to fetch TTS manifest from ${TTS_MANIFEST_URL}: ${(error as Error).message}`);
@@ -275,6 +276,7 @@ async function loadDataPostsInFolder(
       // Set audio version from TTS manifest
       const ttsEntry = ttsAudioManifest[file.replace(/\.md$/, "")];
       frontMatter.audioVersion = ttsEntry?.audioUrl || undefined;
+      frontMatter.audioFileSize = ttsEntry?.fileSize || 0;
 
       return {
         id: file,
