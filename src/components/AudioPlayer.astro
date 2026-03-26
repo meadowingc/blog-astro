@@ -14,16 +14,18 @@ const audioId = `audio-${Math.random().toString(36).substr(2, 9)}`;
       <span class="play-icon">▶</span>
       <span class="pause-icon" style="display: none;">⏸</span>
     </button>
-    <div id={audioId} class="waveform"></div>
+    <div id={audioId} class="waveform"><span class="waveform-loading">loading audio...</span></div>
     <span class="time-display">
       <span id={`current-${audioId}`}>0:00</span>/<span id={`duration-${audioId}`}>0:00</span>
     </span>
-    <span
-      class="audio-info-tooltip"
-      title="This is an AI-generated audio clip using my voice. A post about how I did this will be coming soon!"
-    >
+    <button class="audio-info-tooltip" aria-label="Audio info">
       ?
-    </span>
+      <span class="audio-info-popup">
+        This is an AI-generated audio version using my voice. For more info see <a
+          href="/blog/0064-making-audio-versions-of-my-posts/">this post</a
+        >.
+      </span>
+    </button>
   </div>
 </div>
 
@@ -75,10 +77,24 @@ const audioId = `audio-${Math.random().toString(36).substr(2, 9)}`;
           currentTimeEl.textContent = formatTime(currentTime);
         });
 
-        // Set duration when ready
+        // Show duration early from media element metadata
+        const mediaEl = wavesurfer.getMediaElement();
+        mediaEl.addEventListener(
+          "loadedmetadata",
+          () => {
+            if (mediaEl.duration && isFinite(mediaEl.duration)) {
+              durationEl.textContent = formatTime(mediaEl.duration);
+            }
+          },
+          { once: true },
+        );
+
+        // Update duration when fully decoded (more accurate)
         wavesurfer.on("ready", () => {
           const duration = wavesurfer.getDuration();
           durationEl.textContent = formatTime(duration);
+          // Remove loading placeholder
+          container.querySelector(".waveform-loading")?.remove();
         });
 
         // Handle play/pause button
@@ -120,6 +136,24 @@ const audioId = `audio-${Math.random().toString(36).substr(2, 9)}`;
           </audio>
         `;
       }
+    });
+
+    // Toggle tooltip popups on click/tap
+    document.querySelectorAll(".audio-info-tooltip").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const popup = btn.querySelector(".audio-info-popup") as HTMLElement;
+        if (!popup) return;
+        const isVisible = popup.style.display === "block";
+        // Close all open popups first
+        document.querySelectorAll(".audio-info-popup").forEach((p: any) => (p.style.display = "none"));
+        if (!isVisible) popup.style.display = "block";
+      });
+    });
+
+    // Close popups when clicking elsewhere
+    document.addEventListener("click", () => {
+      document.querySelectorAll(".audio-info-popup").forEach((p: any) => (p.style.display = "none"));
     });
   });
 </script>
@@ -173,6 +207,21 @@ const audioId = `audio-${Math.random().toString(36).substr(2, 9)}`;
     border-radius: 1px;
     overflow: hidden;
     min-width: 0;
+    position: relative;
+  }
+
+  .waveform-loading {
+    position: absolute;
+    inset: 0;
+    font-family: var(--font-secondary);
+    font-size: 0.75rem;
+    color: var(--text-color);
+    opacity: 0.4;
+    font-style: italic;
+    line-height: 40px;
+    display: block;
+    text-align: center;
+    pointer-events: none;
   }
 
   .time-display {
@@ -188,10 +237,10 @@ const audioId = `audio-${Math.random().toString(36).substr(2, 9)}`;
   .audio-info-tooltip {
     font-family: var(--font-secondary);
     font-size: 0.8rem;
-    color: var(--text-color);
-    opacity: 0.5;
-    cursor: help;
-    border: 1px solid var(--text-color);
+    color: color-mix(in srgb, var(--text-color) 50%, transparent);
+    cursor: pointer;
+    background: transparent;
+    border: 1px solid color-mix(in srgb, var(--text-color) 50%, transparent);
     border-radius: 50%;
     width: 16px;
     height: 16px;
@@ -199,12 +248,34 @@ const audioId = `audio-${Math.random().toString(36).substr(2, 9)}`;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    transition: opacity 0.15s ease;
+    transition:
+      color 0.15s ease,
+      border-color 0.15s ease;
     position: relative;
+    padding: 0;
   }
 
   .audio-info-tooltip:hover {
-    opacity: 0.8;
+    color: color-mix(in srgb, var(--text-color) 80%, transparent);
+    border-color: color-mix(in srgb, var(--text-color) 80%, transparent);
+  }
+
+  .audio-info-popup {
+    display: none;
+    position: absolute;
+    bottom: calc(100% + 8px);
+    right: 0;
+    background: var(--background-color, #fff);
+    border: 1px solid var(--text-color);
+    border-radius: 4px;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.75rem;
+    line-height: 1.4;
+    white-space: normal;
+    width: 200px;
+    z-index: 10;
+    opacity: 1;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   }
 
   @media (max-width: 600px) {
