@@ -180,6 +180,26 @@ const { pageTitle, openGraph } = Astro.props as Props;
     max-width: 100%;
   }
 
+  pre {
+    overflow-x: auto;
+    max-width: 100%;
+    padding: 1em 15px;
+    color: var(--code-color);
+    border-radius: 3px;
+    margin-block-start: 1em;
+    margin-block-end: 1em;
+  }
+
+  pre:has(code[class*="language-"]) {
+    background-color: var(--code-background-color);
+  }
+
+  pre code {
+    background-color: transparent;
+    padding: 0;
+    border-radius: 0;
+  }
+
   code {
     font-family: monospace;
     padding: 2px;
