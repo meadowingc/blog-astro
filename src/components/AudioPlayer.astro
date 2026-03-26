@@ -14,8 +14,10 @@ const audioId = `audio-${Math.random().toString(36).substr(2, 9)}`;
       <span class="play-icon">▶</span>
       <span class="pause-icon" style="display: none;">⏸</span>
     </button>
-    <div id={audioId} class="waveform"><span class="waveform-loading">loading audio...</span></div>
-    <span class="time-display">
+    <div id={audioId} class="waveform">
+      <span class="waveform-placeholder">listen to audio version</span>
+    </div>
+    <span class="time-display" id={`time-${audioId}`} style="visibility: hidden;">
       <span id={`current-${audioId}`}>0:00</span>/<span id={`duration-${audioId}`}>0:00</span>
     </span>
     <button class="audio-info-tooltip" aria-label="Audio info">
@@ -40,9 +42,8 @@ const audioId = `audio-${Math.random().toString(36).substr(2, 9)}`;
       const htmlElement = playerElement as HTMLElement;
       const audioSrc = htmlElement.dataset.audioSrc;
       const audioId = htmlElement.dataset.audioId;
-      const audioTitle = htmlElement.dataset.audioTitle;
 
-      const container = document.getElementById(audioId!);
+      const container = document.getElementById(audioId!) as HTMLElement;
       const playBtn = document.getElementById(`play-${audioId}`) as HTMLButtonElement;
       const playIcon = playBtn?.querySelector(".play-icon") as HTMLElement;
       const pauseIcon = playBtn?.querySelector(".pause-icon") as HTMLElement;
@@ -51,9 +52,27 @@ const audioId = `audio-${Math.random().toString(36).substr(2, 9)}`;
 
       if (!container || !playBtn || !playIcon || !pauseIcon || !currentTimeEl || !durationEl) return;
 
-      try {
-        // Create WaveSurfer instance
-        const wavesurfer = WaveSurfer.create({
+      function formatTime(seconds: number) {
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = Math.floor(seconds % 60);
+        return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
+      }
+
+      let wavesurfer: WaveSurfer | null = null;
+
+      function initWaveSurfer() {
+        // Show time display
+        const timeDisplay = document.getElementById(`time-${audioId}`);
+        if (timeDisplay) timeDisplay.style.visibility = "visible";
+
+        // Replace placeholder with loading text
+        const placeholder = container.querySelector(".waveform-placeholder");
+        if (placeholder) {
+          placeholder.textContent = "loading audio...";
+          placeholder.classList.replace("waveform-placeholder", "waveform-loading");
+        }
+
+        wavesurfer = WaveSurfer.create({
           container: container,
           waveColor: "var(--text-color)",
           progressColor: "var(--link-color)",
@@ -65,14 +84,6 @@ const audioId = `audio-${Math.random().toString(36).substr(2, 9)}`;
           url: audioSrc!,
         });
 
-        // Format time helper
-        function formatTime(seconds) {
-          const minutes = Math.floor(seconds / 60);
-          const remainingSeconds = Math.floor(seconds % 60);
-          return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
-        }
-
-        // Update time display
         wavesurfer.on("timeupdate", (currentTime) => {
           currentTimeEl.textContent = formatTime(currentTime);
         });
@@ -89,20 +100,11 @@ const audioId = `audio-${Math.random().toString(36).substr(2, 9)}`;
           { once: true },
         );
 
-        // Update duration when fully decoded (more accurate)
         wavesurfer.on("ready", () => {
-          const duration = wavesurfer.getDuration();
-          durationEl.textContent = formatTime(duration);
-          // Remove loading placeholder
+          durationEl.textContent = formatTime(wavesurfer!.getDuration());
           container.querySelector(".waveform-loading")?.remove();
         });
 
-        // Handle play/pause button
-        playBtn.addEventListener("click", () => {
-          wavesurfer.playPause();
-        });
-
-        // Update button state
         wavesurfer.on("play", () => {
           playIcon.style.display = "none";
           pauseIcon.style.display = "inline";
@@ -113,29 +115,31 @@ const audioId = `audio-${Math.random().toString(36).substr(2, 9)}`;
           pauseIcon.style.display = "none";
         });
 
-        // Reset button when finished
         wavesurfer.on("finish", () => {
           playIcon.style.display = "inline";
           pauseIcon.style.display = "none";
         });
 
-        // Click to seek
         wavesurfer.on("interaction", () => {
-          wavesurfer.play();
+          wavesurfer!.play();
         });
-      } catch (error) {
-        console.error("Failed to initialize WaveSurfer:", error);
-        // Fallback to basic HTML5 audio
-        container.innerHTML = `
-          <audio controls style="width: 100%;">
-            <source src="${audioSrc}" type="audio/wav">
-            <source src="${audioSrc}" type="audio/mpeg">
-            <source src="${audioSrc}" type="audio/mp4">
-            <source src="${audioSrc}" type="audio/x-m4a">
-            Your browser does not support the audio element.
-          </audio>
-        `;
+
+        return wavesurfer;
       }
+
+      // Clicking the placeholder also triggers load
+      container.querySelector(".waveform-placeholder")?.addEventListener("click", () => {
+        playBtn.click();
+      });
+
+      playBtn.addEventListener("click", () => {
+        if (!wavesurfer) {
+          const ws = initWaveSurfer();
+          ws.once("ready", () => ws.play());
+        } else {
+          wavesurfer.playPause();
+        }
+      });
     });
 
     // Toggle tooltip popups on click/tap
@@ -208,8 +212,10 @@ const audioId = `audio-${Math.random().toString(36).substr(2, 9)}`;
     overflow: hidden;
     min-width: 0;
     position: relative;
+    min-height: 40px;
   }
 
+  .waveform-placeholder,
   .waveform-loading {
     position: absolute;
     inset: 0;
@@ -222,6 +228,19 @@ const audioId = `audio-${Math.random().toString(36).substr(2, 9)}`;
     display: block;
     text-align: center;
     pointer-events: none;
+  }
+
+  .waveform-placeholder {
+    cursor: pointer;
+    pointer-events: auto;
+    opacity: 0.5;
+    text-decoration: underline;
+    text-decoration-style: dotted;
+    text-underline-offset: 3px;
+  }
+
+  .waveform-placeholder:hover {
+    opacity: 0.8;
   }
 
   .time-display {
