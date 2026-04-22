@@ -56,6 +56,8 @@ jobs:
 
       - name: Build the site
         uses: withastro/action@v2
+        env:
+          READECK_TOKEN: ${{ secrets.READECK_TOKEN }}
         with:
           path: ./blog-astro
 
