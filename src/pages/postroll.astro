@@ -1,0 +1,121 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { fetchPostrollBookmarks, type BookmarkSummary } from "../utils/readeck";
+
+const bookmarks = await fetchPostrollBookmarks();
+
+const bookmarksByMonth: { [key: string]: BookmarkSummary[] } = bookmarks.reduce(
+  (acc, b) => {
+    const d = new Date(b.updated);
+    const month = d.toLocaleString("en-US", { month: "long", timeZone: "America/Costa_Rica" });
+    const year = d.toLocaleString("en-US", { year: "numeric", timeZone: "America/Costa_Rica" });
+    const monthYear = `${year} ${month}`;
+    if (!acc[monthYear]) acc[monthYear] = [];
+    acc[monthYear].push(b);
+    return acc;
+  },
+  {} as { [key: string]: BookmarkSummary[] },
+);
+
+const favoriteCount = bookmarks.filter((b) => b.is_marked).length;
+---
+
+<Layout
+  pageTitle="Postroll"
+  openGraph={{
+    title: "Postroll",
+    description: "A rolling list of posts, articles, and pages I've been reading from around the web.",
+    url: "https://meadow.cafe/postroll",
+    type: "website",
+  }}
+>
+  <h1 id="postroll">Postroll</h1>
+  <p>
+    <em
+      >Disclaimer: a link here is not necessarily an endorsement. I also don't always "bookmark" everything I read, so there might
+      be a few missing posts.</em
+    >
+  </p>
+  <p>
+    Also available as <a href="/feeds/postroll_rss.xml">RSS</a>.
+  </p>
+  <hr />
+
+  {
+    Object.entries(bookmarksByMonth).map(([monthYear, items]) => (
+      <section>
+        <h2>{monthYear}</h2>
+        <ul class="postroll-list">
+          {items.map((b) => {
+            // Pick the best "by" attribution. Readeck's `authors` is the real
+            // article author when extraction works (e.g. Medium / Substack /
+            // NYT). Comma-joined values from RSS feeds get split into individual
+            // authors. Fall back to `site_name` for blogs that don't expose an
+            // author (personal sites, mariozechner.at, etc.).
+            const rawAuthors = (b.authors || []).flatMap((a) => a.split(",").map((s) => s.trim())).filter(Boolean);
+            let attribution = "";
+            if (rawAuthors.length > 0) {
+              attribution =
+                rawAuthors.length === 1
+                  ? rawAuthors[0]
+                  : rawAuthors.length === 2
+                    ? `${rawAuthors[0]} & ${rawAuthors[1]}`
+                    : `${rawAuthors[0]} et al.`;
+            } else {
+              attribution = b.site_name || b.site || "";
+            }
+            return (
+              <li>
+                <a href={b.url} target="_blank" rel="noopener">
+                  {(b.title || b.url).trim()}
+                </a>
+                {b.is_marked && (
+                  <span class="favorite" title="Favorite" aria-label="Favorite">
+                    {" "}
+                    ⭐
+                  </span>
+                )}
+                {attribution && <span class="site"> by {attribution}</span>}
+                <time datetime={new Date(b.updated).toISOString()}>
+                  {new Date(b.updated).toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric",
+                    timeZone: "America/Costa_Rica",
+                  })}
+                </time>
+              </li>
+            );
+          })}
+        </ul>
+      </section>
+    ))
+  }
+</Layout>
+
+<style>
+  .postroll-list {
+    list-style: none;
+    padding-left: 0;
+  }
+
+  .postroll-list li {
+    margin-bottom: 0.5rem;
+    line-height: 1.5;
+  }
+
+  .favorite {
+    margin-right: 0.25rem;
+  }
+
+  .postroll-list .site {
+    color: #666;
+    font-size: 0.9em;
+  }
+
+  .postroll-list time {
+    margin-left: 0.5rem;
+    color: #888;
+    font-size: 0.85em;
+  }
+</style>

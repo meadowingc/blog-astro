@@ -52,3 +52,14 @@ All commands are run from the root of the project, from a terminal:
 ## 👀 Want to learn more?
 
 Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+
+## 🔑 Build-time env vars
+
+The `/postroll/` page and its RSS feed pull from a [Readeck](https://readeck.org/) instance at build time.
+
+| Variable           | Required | Description                                                           |
+| :----------------- | :------- | :-------------------------------------------------------------------- |
+| `READECK_TOKEN`    | yes      | Readeck API bearer token (scope: `bookmarks:read`).                   |
+| `READECK_BASE_URL` | no       | Override Readeck base URL. Defaults to `https://readeck.meadow.cafe`. |
+
+If `READECK_TOKEN` is missing or the API returns a non-2xx response, the build fails.

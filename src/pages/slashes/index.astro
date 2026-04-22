@@ -4,6 +4,20 @@ import Layout from "../../layouts/Layout.astro";
 
 const slashPages = (await getCollection("obsidianPublishedPages"))
   .map((col) => col.data)
+  .filter((page) => page.slug !== "theme" && page.slug !== "home")
+  .map((page) => ({ slug: page.slug, title: page.title, description: page.description }))
+  .concat([
+    {
+      slug: "postroll",
+      title: "Postroll",
+      description: "Things I've been reading from around the web.",
+    },
+    {
+      slug: "dreams",
+      title: "Dreams",
+      description: "Writing and analyzing my dreams. Updated sporadically.",
+    },
+  ])
   .sort((a, b) => a.title.localeCompare(b.title));
 ---
 
