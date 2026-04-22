@@ -65,12 +65,16 @@ async function fetchPage(
         headers: {
           Authorization: `Bearer ${token}`,
           Accept: "application/json",
+          "User-Agent": "meadow.cafe-build/1.0 (+https://meadow.cafe)",
         },
         signal: AbortSignal.timeout(15_000),
       });
 
       if (!res.ok) {
-        throw new Error(`Readeck request failed: ${res.status} ${res.statusText} for ${url.toString()}`);
+        const body = await res.text().catch(() => "<unable to read body>");
+        throw new Error(
+          `Readeck request failed: ${res.status} ${res.statusText} for ${url.toString()} — body: ${body.slice(0, 500)}`,
+        );
       }
 
       const items = (await res.json()) as BookmarkSummary[];
