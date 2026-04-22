@@ -66,9 +66,8 @@ const favoriteCount = bookmarks.filter((b) => b.is_marked).length;
             }
             return (
               <li>
-                <a href={b.url} target="_blank" rel="noopener">
-                  {(b.title || b.url).trim()}
-                </a>
+                {/* prettier-ignore */}
+                <a href={b.url} target="_blank" rel="noopener">{(b.title || b.url).trim()}</a>
                 {b.is_marked && (
                   <span class="favorite" title="Favorite" aria-label="Favorite">
                     {" "}
