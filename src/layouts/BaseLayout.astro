@@ -31,12 +31,15 @@ const { pageTitle, openGraph } = Astro.props as Props;
       href={new URL("feeds/main_rss.xml", Astro.site)}
     />
     <link rel="alternate" type="application/rss+xml" title="Meadow — Photos" href={new URL("feeds/photos_rss.xml", Astro.site)} />
-    <link rel="webmention" href="https://mochi-webmentions.meadow.cafe/webmention/meadow/1/receive" />
+    <link
+      rel="webmention"
+      href="https://mochi-webmentions.meadow.cafe/webmention/9x8CHWTyAMqx9C8YJEjpHyzQv9dP9SG_4f6YDoUJlsM/receive"
+    />
     <link rel="pingback" href="https://webmention.io/meadow.cafe/xmlrpc" />
 
     <!-- <script is:inline src="https://tinylytics.app/embed/vuxge7ZWyc3xfzhxp7_y.js?kudos=custom&countries" defer></script> -->
     <script is:inline src="https://tinylytics.app/embed/vuxge7ZWyc3xfzhxp7_y.js?countries" defer></script>
-    <script is:inline src="https://mochi.meadow.cafe/reaper/meadow/embed/1.js?kudos" async></script>
+    <script src="https://mochi.meadow.cafe/reaper/9x8CHWTyAMqx9C8YJEjpHyzQv9dP9SG_4f6YDoUJlsM/embed.js?kudos" async></script>
 
     <title>{pageTitle} | Meadow</title>
 
