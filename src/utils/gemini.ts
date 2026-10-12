@@ -9,6 +9,16 @@ export function htmlToGemtext(html: string): string {
   const dom = new JSDOM(html);
   const document = dom.window.document;
 
+  // Preserve the TeX source instead of flattening MathML and its annotation twice.
+  for (const math of document.querySelectorAll(".katex")) {
+    const source = math.querySelector('annotation[encoding="application/x-tex"]');
+    if (source) {
+      const tex = source.textContent;
+      const isDisplay = math.querySelector('math[display="block"]');
+      math.replaceWith(isDisplay ? `\n\n$$\n${tex}\n$$\n\n` : `$${tex}$`);
+    }
+  }
+
   // Track extracted links to append at the end of sections
   let extractedLinks: { url: string; text: string; id: string }[] = [];
 

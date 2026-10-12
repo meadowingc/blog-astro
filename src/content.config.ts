@@ -4,12 +4,11 @@ import fs from "fs";
 import * as matter from "gray-matter";
 import { JSDOM } from "jsdom";
 import { DateTime } from "luxon";
-import { Marked } from "marked";
-import markedFootnote from "marked-footnote";
 import os from "os";
 
 import path from "path";
 import { BacklinkEntrySchema, BlueskyImageSchema, NowPageSchema, ObsidianDreamSchema, ObsidianPageSchema, ObsidianPostSchema } from "./schemas";
+import { createMarkdownParser } from "./utils/markdown";
 
 const CACHE_DURATION = 5 * 60 * 60 * 1000; // hours in milliseconds
 const BLUESKY_IMAGES_CACHE_FILE_PATH = path.join(os.tmpdir(), "AstroBlog__BlueskyImagesCache.json");
@@ -190,7 +189,7 @@ async function loadDataPostsInFolder(
 
   console.log(`Found ${markdownFiles.length} markdown files under Obsidian folder: ${folderPath}`);
 
-  const markedParser = new Marked().use(markedFootnote());
+  const markedParser = createMarkdownParser();
   const ttsAudioManifest = await getTtsAudioManifest();
 
   return await Promise.all(
@@ -498,7 +497,7 @@ const historicalNowPages = defineCollection({
     console.log(">> Loading Now Pages");
 
     const nowFolderPath = path.join(baseObsidianPath, "Blog/Pages/Now");
-    const markedParser = new Marked().use(markedFootnote());
+    const markedParser = createMarkdownParser();
 
     try {
       // Read all .md files from the Now folder
@@ -723,7 +722,7 @@ const backlinks = defineCollection({
     // Load now pages
     if (!cachedNowPages) {
       const nowFolderPath = path.join(baseObsidianPath, "Blog/Pages/Now");
-      const markedParser = new Marked().use(markedFootnote());
+      const markedParser = createMarkdownParser();
       try {
         const files = fs.readdirSync(nowFolderPath)
           .filter(file => file.endsWith('.md') && /^\d{4}-\d{2}-\d{2}\.md$/.test(file));

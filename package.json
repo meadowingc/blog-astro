@@ -6,6 +6,7 @@
     "dev": "astro dev",
     "start": "astro dev",
     "build": "astro check && astro build",
+    "test": "node --test tests/*.test.mjs",
     "preview": "astro preview",
     "astro": "astro",
     "upgrade": "npx @astrojs/upgrade"
@@ -21,9 +22,11 @@
     "astro-og-canvas": "^0.10.0",
     "gray-matter": "^4.0.3",
     "jsdom": "^27.4.0",
+    "katex": "^0.16.47",
     "luxon": "^3.5.0",
     "marked": "^17.0.1",
     "marked-footnote": "^1.2.4",
+    "marked-katex-extension": "^5.1.13",
     "typescript": "^5.7.3",
     "wavesurfer.js": "^7.9.5"
   },
